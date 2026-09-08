@@ -3,10 +3,11 @@ import {
   printHelp,
   resolveTargetEndpoint,
   resolveIntervalMs,
+  DEFAULT_UI_PORT,
 } from "./config.js";
 import { getInitialDevices } from "./devices.js";
-import { evolveDeviceState } from "./physics.js";
-import { transmitTelemetryCycle } from "./transmitter.js";
+import { SimulationEngine } from "./simulator.js";
+import { startSimulatorServer } from "./server.js";
 
 async function main() {
   const cli = parseCliArgs(process.argv.slice(2));
@@ -27,14 +28,63 @@ async function main() {
     process.exit(1);
   }
 
-  // Resolve interval
-  const intervalMs = resolveIntervalMs(cli.intervalMs || process.env.IOT_INTERVAL_MS);
+  // Resolve interval (default 10 minutes = 600,000ms)
+  const intervalMs = resolveIntervalMs(
+    cli.intervalMs || process.env.IOT_INTERVAL_MS
+  );
 
-  // Initialize devices
-  const devices = getInitialDevices(cli.hives);
-  if (devices.length === 0) {
+  // Validate devices
+  const initialDevices = getInitialDevices(cli.hives);
+  if (initialDevices.length === 0) {
     console.error("[FATAL] No matching hives found to simulate.");
     process.exit(1);
+  }
+
+  // If single-cycle CLI mode requested, execute immediately and exit
+  if (cli.once) {
+    console.log("\n=======================================================");
+    console.log("       HONEYCHAIN IOT EDGE TELEMETRY SIMULATOR         ");
+    console.log("=======================================================");
+    console.log(`[CONFIG] Ingestion Endpoint : ${endpointUrl}`);
+    console.log(`[CONFIG] Monitored Devices  : ${initialDevices.length} hives`);
+    console.log(`[CONFIG] Mode               : Single Cycle (--once)`);
+    console.log("=======================================================\n");
+
+    const engine = new SimulationEngine({
+      targetUrl: endpointUrl,
+      intervalMs,
+      hives: cli.hives,
+    });
+
+    console.log(`--- Transmitting Single Telemetry Cycle at ${new Date().toLocaleTimeString()} ---`);
+    const summary = await engine.transmitBatch();
+    console.log(
+      `--- Cycle Summary: Total ${summary.total} | OK: ${summary.successful} | Dup: ${summary.duplicates} | Failed: ${summary.failed} ---\n`
+    );
+
+    process.exit(summary.failed > 0 && summary.successful === 0 ? 1 : 0);
+  }
+
+  // Continuous Daemon Mode with Embedded Web UI
+  const engine = new SimulationEngine({
+    targetUrl: endpointUrl,
+    intervalMs,
+    hives: cli.hives,
+  });
+
+  const uiPort =
+    cli.uiPort ||
+    (process.env.UI_PORT ? parseInt(process.env.UI_PORT, 10) : DEFAULT_UI_PORT);
+
+  let webServer: any = null;
+
+  if (!cli.noUi) {
+    try {
+      const { server } = await startSimulatorServer(engine, uiPort);
+      webServer = server;
+    } catch (err: any) {
+      console.error(`[WARN] Could not start Web UI on port ${uiPort}: ${err.message}`);
+    }
   }
 
   // Print startup banner
@@ -42,59 +92,37 @@ async function main() {
   console.log("       HONEYCHAIN IOT EDGE TELEMETRY SIMULATOR         ");
   console.log("=======================================================");
   console.log(`[CONFIG] Ingestion Endpoint : ${endpointUrl}`);
-  console.log(`[CONFIG] Monitored Devices  : ${devices.length} hives`);
-  console.log(`[CONFIG] Transmission Period: ${intervalMs} ms (${(intervalMs / 1000).toFixed(1)}s)`);
-  console.log(`[CONFIG] Execution Mode     : ${cli.once ? "Single Cycle (--once)" : "Continuous Daemon"}`);
+  console.log(`[CONFIG] Monitored Devices  : ${initialDevices.length} hives`);
+  console.log(`[CONFIG] Cadence (Fixed)    : ${intervalMs} ms (${Math.round(intervalMs / 60000)} minutes)`);
+  if (!cli.noUi && webServer) {
+    console.log(`[UI]     Web Dashboard      : http://localhost:${uiPort}/ui`);
+    console.log(`[UI]     REST Status API    : http://localhost:${uiPort}/api/status`);
+  }
   console.log("=======================================================\n");
 
-  let isRunning = true;
-  let cycleIndex = 0;
-  let timer: NodeJS.Timeout | null = null;
-
-  const runCycle = async () => {
-    if (!isRunning) return;
-    cycleIndex += 1;
-    const startTime = new Date();
-    console.log(
-      `--- [Cycle #${cycleIndex}] Transmitting Telemetry at ${startTime.toLocaleTimeString()} ---`
-    );
-
-    // Evolve state for each device
-    const payloads = devices.map((device) => evolveDeviceState(device));
-
-    // Transmit to backend
-    const summary = await transmitTelemetryCycle(endpointUrl, payloads);
-
-    console.log(
-      `--- [Cycle #${cycleIndex} Summary] Total: ${summary.total} | OK: ${summary.successful} | Dup: ${summary.duplicates} | Failed: ${summary.failed} ---\n`
-    );
-
-    if (cli.once) {
-      process.exit(summary.failed > 0 && summary.successful === 0 ? 1 : 0);
-    }
-  };
+  // Start the 10-minute cadence timer
+  engine.start();
+  console.log(
+    `[SIMULATOR] Simulation engine active. Next batch auto-dispatch at ${new Date(
+      Date.now() + intervalMs
+    ).toLocaleTimeString()}.\n`
+  );
 
   // Graceful shutdown handling
   const shutdown = (signal: string) => {
-    console.log(`\n[SIMULATOR] Received ${signal}. Shutting down edge simulator cleanly...`);
-    isRunning = false;
-    if (timer) {
-      clearInterval(timer);
-      timer = null;
+    console.log(`\n[SIMULATOR] Received ${signal}. Shutting down cleanly...`);
+    engine.stop();
+    if (webServer) {
+      webServer.close(() => {
+        process.exit(0);
+      });
+    } else {
+      process.exit(0);
     }
-    process.exit(0);
   };
 
   process.on("SIGINT", () => shutdown("SIGINT"));
   process.on("SIGTERM", () => shutdown("SIGTERM"));
-
-  // First cycle immediately
-  await runCycle();
-
-  // If continuous mode, schedule subsequent cycles
-  if (!cli.once) {
-    timer = setInterval(runCycle, intervalMs);
-  }
 }
 
 main().catch((err) => {

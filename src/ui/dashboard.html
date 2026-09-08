@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HoneyChain — IoT Edge Telemetry Simulator & Control Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-surface: #131b2e;
+      --bg-surface-elevated: #1a243d;
+      --bg-card: rgba(19, 27, 46, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-highlight: rgba(245, 158, 11, 0.35);
+      --text-main: #f3f4f6;
+      --text-muted: #94a3b8;
+      --text-faint: #64748b;
+      --amber-main: #f59e0b;
+      --amber-glow: rgba(245, 158, 11, 0.2);
+      --green-main: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.2);
+      --red-main: #ef4444;
+      --cyan-main: #06b6d4;
+      --purple-main: #8b5cf6;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(245, 158, 11, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 85% 60%, rgba(6, 182, 212, 0.05) 0%, transparent 40%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      font-size: 32px;
+      background: linear-gradient(135deg, #fbbf24, #d97706);
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px var(--amber-glow);
+    }
+
+    .brand-text h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .brand-text span {
+      font-size: 13px;
+      color: var(--amber-main);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .endpoint-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 14px;
+      border-radius: 9999px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .endpoint-pill .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--green-main);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--green-main);
+    }
+
+    /* Countdown Master Banner */
+    .master-banner {
+      background: linear-gradient(135deg, rgba(19, 27, 46, 0.95), rgba(26, 36, 61, 0.95));
+      border: 1px solid var(--border-highlight);
+      border-radius: 16px;
+      padding: 24px 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .master-banner::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--amber-main), var(--cyan-main), var(--purple-main));
+    }
+
+    .banner-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr auto;
+      align-items: center;
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .banner-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .timer-block {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .timer-icon {
+      font-size: 40px;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .timer-info h2 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+
+    .timer-countdown {
+      font-family: var(--font-mono);
+      font-size: 38px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .timer-countdown small {
+      font-size: 14px;
+      color: var(--amber-main);
+      font-weight: 600;
+    }
+
+    .cadence-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fde68a;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .progress-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .progress-bar-bg {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--amber-main), #fbbf24);
+      border-radius: 9999px;
+      transition: width 1s linear;
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .banner-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease-in-out;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #000;
+      font-weight: 700;
+      box-shadow: 0 4px 14px var(--amber-glow);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-surface-elevated);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    /* Hive Cards Section */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .section-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-header p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .hives-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+      gap: 20px;
+      margin-bottom: 36px;
+    }
+
+    @media (max-width: 520px) {
+      .hives-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .hive-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 20px;
+      backdrop-filter: blur(12px);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+
+    .hive-card.customized {
+      border-color: rgba(245, 158, 11, 0.5);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
+    }
+
+    .hive-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .hive-id-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hive-icon {
+      font-size: 24px;
+      background: rgba(255, 255, 255, 0.05);
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hive-id-badge h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .hive-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-top: 2px;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-auto {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-custom {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fde68a;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    /* Sensor Data Inputs Grid */
+    .fields-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .field-group {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-group:focus-within {
+      border-color: var(--amber-main);
+      box-shadow: 0 0 0 1px var(--amber-main);
+    }
+
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .field-label span.unit {
+      color: var(--amber-main);
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+
+    .field-input-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field-input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      width: 100%;
+      outline: none;
+    }
+
+    /* Scenario Quick Presets */
+    .presets-container {
+      margin-bottom: 16px;
+    }
+
+    .presets-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .presets-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .preset-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .preset-chip:hover {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: #fff;
+    }
+
+    /* Hive Card Footer Actions */
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .last-tx-info {
+      font-size: 11px;
+      color: var(--text-faint);
+      font-family: var(--font-mono);
+    }
+
+    /* Logs Section */
+    .logs-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .logs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .logs-table-wrapper {
+      max-height: 280px;
+      overflow-y: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    .logs-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .logs-table th {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(8px);
+    }
+
+    .logs-table td {
+      padding: 8px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+
+    .logs-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .pill-status {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .pill-201 {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+    }
+
+    .pill-200 {
+      background: rgba(6, 182, 212, 0.2);
+      color: #67e8f9;
+    }
+
+    .pill-err {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-surface-elevated);
+      color: #fff;
+      border: 1px solid var(--border-highlight);
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.2s ease-out;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="brand-logo">🐝</div>
+        <div class="brand-text">
+          <h1>HoneyChain IoT Simulator</h1>
+          <span>Edge Gateway & Physics Telemetry Controller</span>
+        </div>
+      </div>
+      <div class="endpoint-pill">
+        <div class="status-dot"></div>
+        <span>Target:</span>
+        <strong id="targetUrlDisplay">http://localhost:5000/api/iot/telemetry</strong>
+      </div>
+    </header>
+
+    <!-- Master Countdown Banner -->
+    <div class="master-banner">
+      <div class="banner-grid">
+        <div class="timer-block">
+          <div class="timer-icon">⏱️</div>
+          <div class="timer-info">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <h2>Next Batch Auto-Transmission</h2>
+              <span class="cadence-badge">🔒 10m Fixed Cadence</span>
+            </div>
+            <div class="timer-countdown">
+              <span id="countdownDisplay">10:00</span>
+              <small id="countdownSeconds">(600s remaining)</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-wrapper">
+          <div class="progress-text">
+            <span>Cycle Progress</span>
+            <span id="progressPct">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBar"></div>
+          </div>
+          <div class="progress-text">
+            <span id="cycleCountDisplay">Cycle #0</span>
+            <span id="nextBatchTime">Calculating...</span>
+          </div>
+        </div>
+
+        <div class="banner-actions">
+          <button class="btn-primary" id="btnTransmitAll" onclick="transmitAllNow()">
+            <span>⚡</span>
+            <span>Transmit Batch Now</span>
+          </button>
+          <button class="btn-secondary" onclick="loadAllHives()">
+            <span>🔄</span>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hives Control Grid -->
+    <div class="section-header">
+      <div>
+        <h2><span>📦</span> Pending Telemetry & Data Manipulation</h2>
+        <p>Inspect or modify simulated sensor readings before they are automatically dispatched in the next 10-minute cycle.</p>
+      </div>
+    </div>
+
+    <div class="hives-grid" id="hivesGrid">
+      <!-- Hive cards rendered dynamically by JavaScript -->
+    </div>
+
+    <!-- Live Event Log -->
+    <div class="logs-panel">
+      <div class="logs-header">
+        <div>
+          <h3 style="font-size: 16px; color: #fff;">📡 Ingestion Activity & Transmission Log</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Real-time feed of sensor payloads sent to the backend ingestion endpoint.</p>
+        </div>
+        <button class="btn-secondary btn-sm" onclick="clearLogs()">Clear Log</button>
+      </div>
+
+      <div class="logs-table-wrapper">
+        <table class="logs-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Hive ID</th>
+              <th>Device ID</th>
+              <th>Status</th>
+              <th>Temp</th>
+              <th>Humidity</th>
+              <th>Weight</th>
+              <th>Battery</th>
+              <th>Sound</th>
+              <th>Backend Response</th>
+            </tr>
+          </thead>
+          <tbody id="logsTableBody">
+            <tr>
+              <td colspan="10" style="text-align: center; color: var(--text-faint); padding: 24px;">
+                Waiting for transmissions... (Next batch in <span id="countdownTableSpan">10:00</span>)
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast">
+    <span id="toastIcon">✓</span>
+    <span id="toastMessage">Action completed successfully</span>
+  </div>
+
+  <script>
+    let hivesData = [];
+    let simulatorStatus = {
+      intervalMs: 600000,
+      secondsRemaining: 600,
+      totalCycles: 0,
+      targetUrl: "http://localhost:5000/api/iot/telemetry"
+    };
+
+    // Show toast feedback
+    function showToast(message, icon = '✓') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').innerText = message;
+      document.getElementById('toastIcon').innerText = icon;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Format seconds to MM:SS
+    function formatTime(totalSeconds) {
+      const mins = Math.floor(Math.max(0, totalSeconds) / 60);
+      const secs = Math.max(0, totalSeconds) % 60;
+      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    // Update Countdown and Progress
+    function updateCountdownUI() {
+      const sec = simulatorStatus.secondsRemaining || 0;
+      const formatted = formatTime(sec);
+      document.getElementById('countdownDisplay').innerText = formatted;
+      document.getElementById('countdownSeconds').innerText = `(${sec}s remaining)`;
+      const tableSpan = document.getElementById('countdownTableSpan');
+      if (tableSpan) tableSpan.innerText = formatted;
+
+      const totalSec = Math.round((simulatorStatus.intervalMs || 600000) / 1000);
+      const elapsed = Math.max(0, totalSec - sec);
+      const pct = Math.min(100, Math.max(0, Math.round((elapsed / totalSec) * 100)));
+
+      document.getElementById('progressBar').style.width = `${pct}%`;
+      document.getElementById('progressPct').innerText = `${pct}%`;
+      document.getElementById('cycleCountDisplay').innerText = `Cycle #${simulatorStatus.totalCycles || 0}`;
+
+      if (simulatorStatus.nextBatchAt) {
+        const nextDate = new Date(simulatorStatus.nextBatchAt);
+        document.getElementById('nextBatchTime').innerText = `Next: ${nextDate.toLocaleTimeString()}`;
+      }
+    }
+
+    // Fetch Status from server
+    async function fetchStatus() {
+      try {
+        const res = await fetch('/api/status');
+        if (res.ok) {
+          simulatorStatus = await res.json();
+          document.getElementById('targetUrlDisplay').innerText = simulatorStatus.targetUrl;
+          updateCountdownUI();
+        }
+      } catch (err) {
+        console.warn('Failed to fetch simulator status', err);
+      }
+    }
+
+    // Load All Hives and render cards
+    async function loadAllHives() {
+      try {
+        const res = await fetch('/api/hives');
+        if (res.ok) {
+          hivesData = await res.json();
+          renderHiveCards(hivesData);
+        }
+      } catch (err) {
+        console.error('Failed to load hives', err);
+      }
+    }
+
+    // Load recent logs
+    async function loadLogs() {
+      try {
+        const res = await fetch('/api/logs');
+        if (res.ok) {
+          const logs = await res.json();
+          renderLogs(logs);
+        }
+      } catch (err) {
+        console.error('Failed to load logs', err);
+      }
+    }
+
+    // Render Hive Cards with input fields and scenario presets
+    function renderHiveCards(hives) {
+      const container = document.getElementById('hivesGrid');
+      container.innerHTML = '';
+
+      hives.forEach(hive => {
+        const p = hive.pendingPayload;
+        const card = document.createElement('div');
+        card.className = `hive-card ${hive.isManipulated ? 'customized' : ''}`;
+        card.id = `card-${hive.hiveId}`;
+
+        card.innerHTML = `
+          <div class="hive-header">
+            <div class="hive-id-badge">
+              <div class="hive-icon">🐝</div>
+              <div>
+                <h3>${hive.hiveId}</h3>
+                <div class="hive-meta">${hive.deviceId} • ${hive.region || 'Apiary Node'}</div>
+              </div>
+            </div>
+            <span class="status-badge ${hive.isManipulated ? 'badge-custom' : 'badge-auto'}" id="status-badge-${hive.hiveId}">
+              ${hive.isManipulated ? '⚡ Overridden' : '✓ Auto Physics'}
+            </span>
+          </div>
+
+          <div class="fields-grid">
+            <div class="field-group">
+              <div class="field-label">
+                <span>Brood Temp</span>
+                <span class="unit">°C</span>
+              </div>
+              <div class="field-input-row">
+                <input type="number" step="0.1" class="field-input" id="input-temp-${hive.hiveId}" value="${p.temperature}">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">
+                <span>Humidity</span>
+                <span class="unit">%</span>
+              </div>
+              <div class="field-input-row">
+                <input type="number" step="0.1" class="field-input" id="input-hum-${hive.hiveId}" value="${p.humidity}">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">
+                <span>Hive Weight</span>
+                <span class="unit">kg</span>
+              </div>
+              <div class="field-input-row">
+                <input type="number" step="0.01" class="field-input" id="input-weight-${hive.hiveId}" value="${p.weightKg}">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">
+                <span>Acoustic Freq</span>
+                <span class="unit">Hz</span>
+              </div>
+              <div class="field-input-row">
+                <input type="number" step="1" class="field-input" id="input-freq-${hive.hiveId}" value="${p.soundFrequencyHz}">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">
+                <span>Sound Level</span>
+                <span class="unit">dB</span>
+              </div>
+              <div class="field-input-row">
+                <input type="number" step="0.5" class="field-input" id="input-db-${hive.hiveId}" value="${p.acousticsDb}">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">
+                <span>Battery Level</span>
+                <span class="unit">%</span>
+              </div>
+              <div class="field-input-row">
+                <input type="number" step="1" min="0" max="100" class="field-input" id="input-bat-${hive.hiveId}" value="${p.batteryLevelPct}">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">
+                <span>Bee In Flow</span>
+                <span class="unit">bees</span>
+              </div>
+              <div class="field-input-row">
+                <input type="number" step="1" min="0" class="field-input" id="input-in-${hive.hiveId}" value="${p.beeInCount}">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">
+                <span>Bee Out Flow</span>
+                <span class="unit">bees</span>
+              </div>
+              <div class="field-input-row">
+                <input type="number" step="1" min="0" class="field-input" id="input-out-${hive.hiveId}" value="${p.beeOutCount}">
+              </div>
+            </div>
+          </div>
+
+          <div class="presets-container">
+            <div class="presets-title">Quick Simulation Presets:</div>
+            <div class="presets-buttons">
+              <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'swarm')">🐝 Swarm Alert</button>
+              <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'overheating')">🔥 Brood Fever</button>
+              <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'chilling')">❄️ Chill Alert</button>
+              <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'nectar_surge')">🍯 Nectar Surge</button>
+              <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'low_battery')">🪫 Low Battery</button>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <div class="last-tx-info">
+              ${hive.lastResult 
+                ? `${hive.lastResult.success ? '✓' : '✗'} Last: ${hive.lastResult.status || 'NET'} (${hive.lastResult.message || ''})`
+                : 'Pending first dispatch'}
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-secondary btn-sm" onclick="resetHive('${hive.hiveId}')" title="Revert to natural biology">
+                🔄 Reset
+              </button>
+              <button class="btn-primary btn-sm" onclick="saveHiveOverrides('${hive.hiveId}')">
+                💾 Save
+              </button>
+              <button class="btn-secondary btn-sm" onclick="transmitHiveNow('${hive.hiveId}')" title="Send this hive immediately">
+                🚀 Send Now
+              </button>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    // Save edited values for a hive
+    async function saveHiveOverrides(hiveId) {
+      const overrides = {
+        temperature: parseFloat(document.getElementById(`input-temp-${hiveId}`).value),
+        humidity: parseFloat(document.getElementById(`input-hum-${hiveId}`).value),
+        weightKg: parseFloat(document.getElementById(`input-weight-${hiveId}`).value),
+        soundFrequencyHz: parseInt(document.getElementById(`input-freq-${hiveId}`).value, 10),
+        acousticsDb: parseFloat(document.getElementById(`input-db-${hiveId}`).value),
+        batteryLevelPct: parseInt(document.getElementById(`input-bat-${hiveId}`).value, 10),
+        beeInCount: parseInt(document.getElementById(`input-in-${hiveId}`).value, 10),
+        beeOutCount: parseInt(document.getElementById(`input-out-${hiveId}`).value, 10),
+      };
+
+      try {
+        const res = await fetch(`/api/hives/${hiveId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(overrides),
+        });
+
+        if (res.ok) {
+          showToast(`Custom telemetry saved for ${hiveId}! Will send on next 10m cycle or immediate send.`);
+          const card = document.getElementById(`card-${hiveId}`);
+          if (card) card.classList.add('customized');
+          const badge = document.getElementById(`status-badge-${hiveId}`);
+          if (badge) {
+            badge.className = 'status-badge badge-custom';
+            badge.innerText = '⚡ Overridden';
+          }
+        } else {
+          showToast('Failed to update telemetry overrides', '✗');
+        }
+      } catch (err) {
+        showToast('Network error saving overrides', '✗');
+      }
+    }
+
+    // Apply quick scenario preset
+    async function applyPreset(hiveId, preset) {
+      try {
+        const res = await fetch(`/api/hives/${hiveId}/preset`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ preset }),
+        });
+
+        if (res.ok) {
+          const updated = await res.json();
+          showToast(`Preset "${preset}" applied to ${hiveId}`);
+          await loadAllHives();
+        }
+      } catch (err) {
+        showToast('Failed to apply preset', '✗');
+      }
+    }
+
+    // Reset hive to natural physics
+    async function resetHive(hiveId) {
+      try {
+        const res = await fetch(`/api/hives/${hiveId}/reset`, { method: 'POST' });
+        if (res.ok) {
+          showToast(`${hiveId} reset to natural physics`);
+          await loadAllHives();
+        }
+      } catch (err) {
+        showToast('Failed to reset hive', '✗');
+      }
+    }
+
+    // Transmit single hive now
+    async function transmitHiveNow(hiveId) {
+      // First save any current inputs
+      await saveHiveOverrides(hiveId);
+
+      try {
+        showToast(`Transmitting ${hiveId} now...`, '🚀');
+        const res = await fetch(`/api/hives/${hiveId}/transmit`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Transmitted ${hiveId} (HTTP ${data.status})`);
+        } else {
+          showToast(`Transmission failed: ${data.message || data.error}`, '✗');
+        }
+        await loadAllHives();
+        await loadLogs();
+      } catch (err) {
+        showToast(`Error sending ${hiveId}`, '✗');
+      }
+    }
+
+    // Transmit all hives immediately
+    async function transmitAllNow() {
+      const btn = document.getElementById('btnTransmitAll');
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+
+      try {
+        showToast('Transmitting full batch of all hives to backend...', '🚀');
+        const res = await fetch('/api/transmit-now', { method: 'POST' });
+        const summary = await res.json();
+        showToast(`Batch complete: ${summary.successful} OK, ${summary.duplicates} Dup, ${summary.failed} Failed`);
+        await fetchStatus();
+        await loadAllHives();
+        await loadLogs();
+      } catch (err) {
+        showToast('Error transmitting batch', '✗');
+      } finally {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+    }
+
+    // Clear logs
+    async function clearLogs() {
+      try {
+        await fetch('/api/logs', { method: 'DELETE' });
+        renderLogs([]);
+        showToast('Logs cleared');
+      } catch (err) {
+        showToast('Failed to clear logs', '✗');
+      }
+    }
+
+    // Render Logs Table
+    function renderLogs(logs) {
+      const tbody = document.getElementById('logsTableBody');
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="10" style="text-align: center; color: var(--text-faint); padding: 24px;">
+              No transmission logs yet.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = logs.map(l => `
+        <tr>
+          <td style="color: var(--text-muted);">${l.timestamp}</td>
+          <td><strong>${l.hiveId}</strong></td>
+          <td style="color: var(--text-faint);">${l.deviceId}</td>
+          <td>
+            <span class="pill-status ${l.status === 201 ? 'pill-201' : (l.status === 200 ? 'pill-200' : 'pill-err')}">
+              ${l.status ? `HTTP ${l.status}` : 'ERR'}
+            </span>
+          </td>
+          <td>${l.temperature}°C</td>
+          <td>${l.humidity}%</td>
+          <td>${l.weightKg} kg</td>
+          <td>${l.batteryLevelPct}%</td>
+          <td>${l.soundFrequencyHz} Hz</td>
+          <td style="color: ${l.success ? 'var(--text-muted)' : '#fca5a5'};">${l.message || ''}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Server-Sent Events (SSE) for Real-Time Synchronization
+    function connectEventStream() {
+      const evtSource = new EventSource('/api/events');
+
+      evtSource.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          if (payload.type === 'tick') {
+            simulatorStatus = payload.data;
+            updateCountdownUI();
+          } else if (payload.type === 'transmit') {
+            fetchStatus();
+            loadAllHives();
+            loadLogs();
+          } else if (payload.type === 'update' || payload.type === 'reset') {
+            loadAllHives();
+          }
+        } catch (err) {
+          // ignore parse error
+        }
+      };
+
+      evtSource.onerror = () => {
+        evtSource.close();
+        // Fallback reconnection after 3 seconds
+        setTimeout(connectEventStream, 3000);
+      };
+    }
+
+    // Local ticking clock for smooth 1-second animation between syncs
+    setInterval(() => {
+      if (simulatorStatus.secondsRemaining > 0) {
+        simulatorStatus.secondsRemaining -= 1;
+        updateCountdownUI();
+      }
+    }, 1000);
+
+    // Initial Load
+    window.addEventListener('DOMContentLoaded', async () => {
+      await fetchStatus();
+      await loadAllHives();
+      await loadLogs();
+      connectEventStream();
+    });
+  </script>
+</body>
+</html>
