@@ -74,7 +74,11 @@ async function main() {
 
   const uiPort =
     cli.uiPort ||
-    (process.env.UI_PORT ? parseInt(process.env.UI_PORT, 10) : DEFAULT_UI_PORT);
+    (process.env.PORT
+      ? parseInt(process.env.PORT, 10)
+      : process.env.UI_PORT
+      ? parseInt(process.env.UI_PORT, 10)
+      : DEFAULT_UI_PORT);
 
   let webServer: any = null;
 

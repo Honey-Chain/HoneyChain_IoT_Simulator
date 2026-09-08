@@ -5,8 +5,9 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "start": "tsx src/index.ts",
-    "once": "tsx src/index.ts --once",
+    "start": "node dist/index.js",
+    "start:dev": "tsx src/index.ts",
+    "once": "node dist/index.js --once",
     "dev": "tsx watch src/index.ts",
     "build": "tsc && mkdir -p dist/ui && cp src/ui/dashboard.html dist/ui/",
     "test": "mocha --node-option import=tsx tests/**/*.test.ts"
