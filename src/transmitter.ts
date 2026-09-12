@@ -101,7 +101,7 @@ export async function transmitTelemetryCycle(
         console.log(
           `  [✓ OK ] ${payload.deviceId} (${payload.hiveId}): ` +
             `${payload.temperature}°C | ${payload.humidity}% | ${payload.weightKg}kg | ` +
-            `${payload.batteryLevelPct}% batt | flow ${payload.flow} -> ${res.message}`
+            `${payload.batteryLevelPct}% batt | in: ${payload.beeInCount} out: ${payload.beeOutCount} -> ${res.message}`
         );
       }
     } else {

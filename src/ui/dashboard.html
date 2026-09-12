@@ -648,11 +648,11 @@
           <div class="timer-info">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
               <h2>Next Batch Auto-Transmission</h2>
-              <span class="cadence-badge">🔒 10m Fixed Cadence</span>
+              <span class="cadence-badge" id="cadenceBadge">⏱️ Interval (.env)</span>
             </div>
             <div class="timer-countdown">
-              <span id="countdownDisplay">10:00</span>
-              <small id="countdownSeconds">(600s remaining)</small>
+              <span id="countdownDisplay">--:--</span>
+              <small id="countdownSeconds">(waiting...)</small>
             </div>
           </div>
         </div>
@@ -688,7 +688,7 @@
     <div class="section-header">
       <div>
         <h2><span>📦</span> Pending Telemetry & Data Manipulation</h2>
-        <p>Inspect or modify simulated sensor readings before they are automatically dispatched in the next 10-minute cycle.</p>
+        <p>Simulating HIVE-SB-101 and HIVE-KV-201 (HIVE-WG-301 streams from physical edge hardware).</p>
       </div>
     </div>
 
@@ -718,14 +718,15 @@
               <th>Humidity</th>
               <th>Weight</th>
               <th>Battery</th>
-              <th>Sound</th>
+              <th>Bee In</th>
+              <th>Bee Out</th>
               <th>Backend Response</th>
             </tr>
           </thead>
           <tbody id="logsTableBody">
             <tr>
-              <td colspan="10" style="text-align: center; color: var(--text-faint); padding: 24px;">
-                Waiting for transmissions... (Next batch in <span id="countdownTableSpan">10:00</span>)
+              <td colspan="11" style="text-align: center; color: var(--text-faint); padding: 24px;">
+                Waiting for transmissions... (Next batch in <span id="countdownTableSpan">--:--</span>)
               </td>
             </tr>
           </tbody>
@@ -777,6 +778,12 @@
       const totalSec = Math.round((simulatorStatus.intervalMs || 600000) / 1000);
       const elapsed = Math.max(0, totalSec - sec);
       const pct = Math.min(100, Math.max(0, Math.round((elapsed / totalSec) * 100)));
+
+      const badge = document.getElementById('cadenceBadge');
+      if (badge) {
+        const cadenceDesc = totalSec >= 60 ? `${(totalSec / 60).toFixed(0)}m Cadence` : `${totalSec}s Cadence`;
+        badge.innerText = `⏱️ ${cadenceDesc} (.env)`;
+      }
 
       document.getElementById('progressBar').style.width = `${pct}%`;
       document.getElementById('progressPct').innerText = `${pct}%`;
@@ -880,27 +887,7 @@
                 <span class="unit">kg</span>
               </div>
               <div class="field-input-row">
-                <input type="number" step="0.01" class="field-input" id="input-weight-${hive.hiveId}" value="${p.weightKg}">
-              </div>
-            </div>
-
-            <div class="field-group">
-              <div class="field-label">
-                <span>Acoustic Freq</span>
-                <span class="unit">Hz</span>
-              </div>
-              <div class="field-input-row">
-                <input type="number" step="1" class="field-input" id="input-freq-${hive.hiveId}" value="${p.soundFrequencyHz}">
-              </div>
-            </div>
-
-            <div class="field-group">
-              <div class="field-label">
-                <span>Sound Level</span>
-                <span class="unit">dB</span>
-              </div>
-              <div class="field-input-row">
-                <input type="number" step="0.5" class="field-input" id="input-db-${hive.hiveId}" value="${p.acousticsDb}">
+                <input type="number" step="0.1" class="field-input" id="input-weight-${hive.hiveId}" value="${p.weightKg}">
               </div>
             </div>
 
@@ -976,8 +963,6 @@
         temperature: parseFloat(document.getElementById(`input-temp-${hiveId}`).value),
         humidity: parseFloat(document.getElementById(`input-hum-${hiveId}`).value),
         weightKg: parseFloat(document.getElementById(`input-weight-${hiveId}`).value),
-        soundFrequencyHz: parseInt(document.getElementById(`input-freq-${hiveId}`).value, 10),
-        acousticsDb: parseFloat(document.getElementById(`input-db-${hiveId}`).value),
         batteryLevelPct: parseInt(document.getElementById(`input-bat-${hiveId}`).value, 10),
         beeInCount: parseInt(document.getElementById(`input-in-${hiveId}`).value, 10),
         beeOutCount: parseInt(document.getElementById(`input-out-${hiveId}`).value, 10),
@@ -991,7 +976,7 @@
         });
 
         if (res.ok) {
-          showToast(`Custom telemetry saved for ${hiveId}! Will send on next 10m cycle or immediate send.`);
+          showToast(`Custom telemetry saved for ${hiveId}! Will send on next cycle or immediate send.`);
           const card = document.getElementById(`card-${hiveId}`);
           if (card) card.classList.add('customized');
           const badge = document.getElementById(`status-badge-${hiveId}`);
@@ -1017,7 +1002,6 @@
         });
 
         if (res.ok) {
-          const updated = await res.json();
           showToast(`Preset "${preset}" applied to ${hiveId}`);
           await loadAllHives();
         }
@@ -1067,7 +1051,7 @@
       btn.style.opacity = '0.6';
 
       try {
-        showToast('Transmitting full batch of all hives to backend...', '🚀');
+        showToast('Transmitting batch of simulated hives to backend...', '🚀');
         const res = await fetch('/api/transmit-now', { method: 'POST' });
         const summary = await res.json();
         showToast(`Batch complete: ${summary.successful} OK, ${summary.duplicates} Dup, ${summary.failed} Failed`);
@@ -1099,7 +1083,7 @@
       if (!logs || logs.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="10" style="text-align: center; color: var(--text-faint); padding: 24px;">
+            <td colspan="11" style="text-align: center; color: var(--text-faint); padding: 24px;">
               No transmission logs yet.
             </td>
           </tr>
@@ -1121,7 +1105,8 @@
           <td>${l.humidity}%</td>
           <td>${l.weightKg} kg</td>
           <td>${l.batteryLevelPct}%</td>
-          <td>${l.soundFrequencyHz} Hz</td>
+          <td>${l.beeInCount}</td>
+          <td>${l.beeOutCount}</td>
           <td style="color: ${l.success ? 'var(--text-muted)' : '#fca5a5'};">${l.message || ''}</td>
         </tr>
       `).join('');

@@ -36,15 +36,13 @@ Simulates physical IoT edge nodes (such as ESP32-S3 microcontroller sensor suite
 
 ## Simulated Apiaries & Hives
 
-The simulator maintains state for the 5 seeded HoneyChain hives:
+The simulator maintains state for the 2 simulated HoneyChain hives (`HIVE-WG-301` receives data from physical hardware):
 
-| Hive ID | Device ID | Apiary | Region | Floral Source |
+| Hive ID | Device ID | Apiary | Region | Type |
 | :--- | :--- | :--- | :--- | :--- |
-| `HIVE-SB-101` | `ESP32-SB-GW-01` | `APIARY-SB-01` | Sundarbans Mangrove Reserve | Sundarbans Wild Mangrove Flower |
-| `HIVE-SB-102` | `ESP32-SB-GW-02` | `APIARY-SB-01` | Sundarbans Mangrove Reserve | Sundarbans Wild Mangrove Flower |
-| `HIVE-KV-201` | `ESP32-KV-GW-01` | `APIARY-KV-02` | Kashmir Valley Apiary | Kashmiri White Acacia & Saffron |
-| `HIVE-KV-202` | `ESP32-KV-GW-02` | `APIARY-KV-02` | Kashmir Valley Apiary | Kashmiri White Acacia & Saffron |
-| `HIVE-WG-301` | `ESP32-WG-GW-01` | `APIARY-WG-03` | Western Ghats Rainforest | Cardamom & Forest Multifloral |
+| `HIVE-SB-101` | `ESP32-SB-GW-01` | `APIARY-SB-01` | Sundarbans Mangrove Reserve | Simulated Edge Node |
+| `HIVE-KV-201` | `ESP32-KV-GW-01` | `APIARY-KV-02` | Kashmir Valley Apiary | Simulated Edge Node |
+| `HIVE-WG-301` | `ESP32-WG-GW-01` | `APIARY-WG-03` | Western Ghats Rainforest | *Physical IoT Edge Hardware* |
 
 ---
 
@@ -160,35 +158,19 @@ The simulator server provides the following endpoints:
 
 ## Telemetry Payload Schema
 
-Each reading transmitted to `POST /api/iot/telemetry` matches the following contract:
+Each reading transmitted to `POST /api/iot/telemetry` matches the exact physical IoT edge device format:
 
 ```json
 {
-  "deviceId": "ESP32-SB-GW-01",
   "hiveId": "HIVE-SB-101",
-  "timestamp": "2026-09-09T01:30:00.000Z",
-  "temperature": 34.82,
-  "humidity": 58.4,
-  "weightKg": 31.462,
-  "flow": 42,
-  "beeInCount": 68,
-  "beeOutCount": 26,
-  "soundFrequencyHz": 218,
-  "acousticsDb": 61.2,
-  "batteryLevelPct": 96,
-  "ambientTemperature": 27.5,
-  "ambientHumidity": 62.1,
-  "metadata": {
-    "source": "simulator",
-    "protocol": "HTTP/REST",
-    "firmwareVersion": "v2.4.0-edge",
-    "gatewayId": "SIM-GATEWAY-ALPHA",
-    "simulationCycle": 1,
-    "simulationVersion": "2.0",
-    "rssi": -78,
-    "snr": 9.4,
-    "region": "Sundarbans Mangrove Reserve"
-  }
+  "deviceId": "ESP32-SB-GW-01",
+  "timestamp": "2026-09-12T18:30:00.000Z",
+  "temperature": 34.8,
+  "humidity": 58.2,
+  "weightKg": 31.5,
+  "batteryLevelPct": 97,
+  "beeInCount": 42,
+  "beeOutCount": 38
 }
 ```
 

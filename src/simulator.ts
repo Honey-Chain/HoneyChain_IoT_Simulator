@@ -5,7 +5,11 @@ import {
   CycleSummary,
   sendTelemetry,
 } from "./transmitter.js";
-import { DEFAULT_INTERVAL_MS, resolveTargetEndpoint } from "./config.js";
+import {
+  DEFAULT_INTERVAL_MS,
+  resolveTargetEndpoint,
+  resolveIntervalMs,
+} from "./config.js";
 
 export interface LogEntry {
   id: string;
@@ -19,9 +23,9 @@ export interface LogEntry {
   temperature: number;
   humidity: number;
   weightKg: number;
-  flow: number;
   batteryLevelPct: number;
-  soundFrequencyHz: number;
+  beeInCount: number;
+  beeOutCount: number;
 }
 
 export interface HiveStatus {
@@ -53,7 +57,7 @@ export type SimulatorEventCallback = (event: {
 
 /**
  * Stateful Simulation Engine that maintains device physics, pending readings,
- * countdown timers, manual overrides, and automated 10-minute transmissions.
+ * countdown timers, manual overrides, and automated transmissions based on .env interval.
  */
 export class SimulationEngine {
   private devices: Map<string, DeviceSimulationState> = new Map();
@@ -62,7 +66,7 @@ export class SimulationEngine {
   private lastResults: Map<string, TransmissionResult> = new Map();
   private lastTransmittedAt: Map<string, string> = new Map();
 
-  private intervalMs: number = DEFAULT_INTERVAL_MS; // Fixed 10 minutes
+  private intervalMs: number;
   private nextBatchTimestamp: number = 0;
   private targetUrl: string;
   private cycleIndex: number = 0;
@@ -84,14 +88,13 @@ export class SimulationEngine {
       "http://localhost:5000";
     this.targetUrl = resolveTargetEndpoint(rawTarget);
 
-    // Default to 10 minutes (600,000 ms)
-    if (options?.intervalMs && options.intervalMs > 0) {
-      this.intervalMs = options.intervalMs;
-    } else {
-      this.intervalMs = DEFAULT_INTERVAL_MS;
-    }
+    // Read interval dynamically from options or .env
+    const envInterval = process.env.IOT_INTERVAL_MS
+      ? parseInt(process.env.IOT_INTERVAL_MS, 10)
+      : undefined;
+    this.intervalMs = resolveIntervalMs(options?.intervalMs ?? envInterval);
 
-    // Initialize devices
+    // Initialize devices (defaults to HIVE-SB-101 and HIVE-KV-201)
     const deviceList = getInitialDevices(options?.hives);
     for (const dev of deviceList) {
       this.devices.set(dev.hiveId, dev);
@@ -140,7 +143,6 @@ export class SimulationEngine {
       const remaining = this.nextBatchTimestamp - Date.now();
       if (remaining <= 0) {
         if (!this.isTransmitting) {
-          // Immediately advance nextBatchTimestamp so subsequent 1-second ticks don't re-trigger while async I/O is in-flight
           this.nextBatchTimestamp = Date.now() + this.intervalMs;
           await this.transmitBatch();
         }
@@ -166,7 +168,6 @@ export class SimulationEngine {
    */
   public async transmitBatch(targetUrl?: string): Promise<CycleSummary> {
     if (this.isTransmitting) {
-      // Guard against concurrent re-entry
       return {
         total: 0,
         successful: 0,
@@ -183,12 +184,9 @@ export class SimulationEngine {
 
       const payloads: TelemetryReadingPayload[] = [];
       const txTime = new Date();
-      for (const [hiveId, payload] of this.pendingReadings.entries()) {
-        // Refresh timestamp to transmission instant and assign unique deterministic ID
+      for (const [_hiveId, payload] of this.pendingReadings.entries()) {
         payload.timestamp = txTime.toISOString();
-        payload.id = `read-${payload.deviceId}-${txTime.getTime()}`;
-        payload.readingId = payload.id;
-        payloads.push(payload);
+        payloads.push({ ...payload });
       }
 
       const results: TransmissionResult[] = [];
@@ -221,9 +219,9 @@ export class SimulationEngine {
           temperature: payload.temperature,
           humidity: payload.humidity,
           weightKg: payload.weightKg,
-          flow: payload.flow,
           batteryLevelPct: payload.batteryLevelPct,
-          soundFrequencyHz: payload.soundFrequencyHz,
+          beeInCount: payload.beeInCount,
+          beeOutCount: payload.beeOutCount,
         });
       }
 
@@ -259,12 +257,10 @@ export class SimulationEngine {
     }
 
     const endpoint = targetUrl ? resolveTargetEndpoint(targetUrl) : this.targetUrl;
-    const txTime = new Date();
-    payload.timestamp = txTime.toISOString();
-    payload.id = `read-${payload.deviceId}-${txTime.getTime()}`;
-    payload.readingId = payload.id;
+    payload.timestamp = new Date().toISOString();
 
-    const res = await sendTelemetry(endpoint, payload);
+    const toSend: TelemetryReadingPayload = { ...payload };
+    const res = await sendTelemetry(endpoint, toSend);
     this.lastResults.set(upperId, res);
     this.lastTransmittedAt.set(upperId, new Date().toISOString());
 
@@ -280,9 +276,9 @@ export class SimulationEngine {
       temperature: payload.temperature,
       humidity: payload.humidity,
       weightKg: payload.weightKg,
-      flow: payload.flow,
       batteryLevelPct: payload.batteryLevelPct,
-      soundFrequencyHz: payload.soundFrequencyHz,
+      beeInCount: payload.beeInCount,
+      beeOutCount: payload.beeOutCount,
     });
 
     // Evolve single hive for next cycle
@@ -311,28 +307,13 @@ export class SimulationEngine {
     }
 
     if (overrides.temperature !== undefined) {
-      current.temperature = Number(Number(overrides.temperature).toFixed(2));
+      current.temperature = Number(Number(overrides.temperature).toFixed(1));
     }
     if (overrides.humidity !== undefined) {
       current.humidity = Number(Number(overrides.humidity).toFixed(1));
     }
     if (overrides.weightKg !== undefined) {
-      current.weightKg = Number(Number(overrides.weightKg).toFixed(3));
-    }
-    if (overrides.flow !== undefined) {
-      current.flow = Math.round(Number(overrides.flow));
-    }
-    if (overrides.beeInCount !== undefined) {
-      current.beeInCount = Math.max(0, Math.round(Number(overrides.beeInCount)));
-    }
-    if (overrides.beeOutCount !== undefined) {
-      current.beeOutCount = Math.max(0, Math.round(Number(overrides.beeOutCount)));
-    }
-    if (overrides.soundFrequencyHz !== undefined) {
-      current.soundFrequencyHz = Math.round(Number(overrides.soundFrequencyHz));
-    }
-    if (overrides.acousticsDb !== undefined) {
-      current.acousticsDb = Number(Number(overrides.acousticsDb).toFixed(1));
+      current.weightKg = Number(Number(overrides.weightKg).toFixed(1));
     }
     if (overrides.batteryLevelPct !== undefined) {
       current.batteryLevelPct = Math.max(
@@ -340,15 +321,11 @@ export class SimulationEngine {
         Math.min(100, Math.round(Number(overrides.batteryLevelPct)))
       );
     }
-    if (overrides.ambientTemperature !== undefined) {
-      current.ambientTemperature = Number(
-        Number(overrides.ambientTemperature).toFixed(1)
-      );
+    if (overrides.beeInCount !== undefined) {
+      current.beeInCount = Math.max(0, Math.round(Number(overrides.beeInCount)));
     }
-    if (overrides.ambientHumidity !== undefined) {
-      current.ambientHumidity = Number(
-        Number(overrides.ambientHumidity).toFixed(1)
-      );
+    if (overrides.beeOutCount !== undefined) {
+      current.beeOutCount = Math.max(0, Math.round(Number(overrides.beeOutCount)));
     }
 
     this.isManipulated.set(upperId, true);
@@ -390,30 +367,24 @@ export class SimulationEngine {
     switch (preset) {
       case "swarm":
         return this.updatePendingTelemetry(upperId, {
-          soundFrequencyHz: 285,
-          acousticsDb: 72.5,
-          beeOutCount: 140,
+          beeOutCount: 160,
           beeInCount: 15,
-          flow: -85,
         });
       case "overheating":
         return this.updatePendingTelemetry(upperId, {
           temperature: 38.6,
           humidity: 45.0,
-          acousticsDb: 68.0,
         });
       case "chilling":
         return this.updatePendingTelemetry(upperId, {
           temperature: 31.8,
           humidity: 69.5,
-          soundFrequencyHz: 195,
         });
       case "nectar_surge":
         return this.updatePendingTelemetry(upperId, {
-          weightKg: current.weightKg + 0.85,
-          flow: 65,
-          beeInCount: 95,
-          beeOutCount: 60,
+          weightKg: Number((current.weightKg + 0.85).toFixed(1)),
+          beeInCount: 135,
+          beeOutCount: 85,
         });
       case "low_battery":
         return this.updatePendingTelemetry(upperId, {

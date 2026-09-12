@@ -55,27 +55,24 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
   });
 
   describe("2. Device State & Hive Filtering", function () {
-    it("getInitialDevices loads all 5 seeded hives by default", function () {
+    it("getInitialDevices loads the 2 active simulated hives by default", function () {
       const devices = getInitialDevices();
-      expect(devices).to.have.lengthOf(5);
-      expect(devices.map((d) => d.hiveId)).to.include.members([
+      expect(devices).to.have.lengthOf(2);
+      expect(devices.map((d) => d.hiveId)).to.have.members([
         "HIVE-SB-101",
-        "HIVE-SB-102",
         "HIVE-KV-201",
-        "HIVE-KV-202",
-        "HIVE-WG-301",
       ]);
     });
 
     it("getInitialDevices filters by specific hive IDs when requested", function () {
-      const filtered = getInitialDevices(["hive-sb-101", "HIVE-WG-301"]);
-      expect(filtered).to.have.lengthOf(2);
-      expect(filtered.map((d) => d.hiveId)).to.have.members(["HIVE-SB-101", "HIVE-WG-301"]);
+      const filtered = getInitialDevices(["hive-sb-101"]);
+      expect(filtered).to.have.lengthOf(1);
+      expect(filtered[0].hiveId).to.equal("HIVE-SB-101");
     });
   });
 
   describe("3. Physics Engine & Biological Telemetry Simulation", function () {
-    it("evolveDeviceState produces compliant telemetry within biological ranges", function () {
+    it("evolveDeviceState produces compliant telemetry matching hardware IoT schema", function () {
       const device = { ...defaultDevices[0] };
       const reading = evolveDeviceState(device);
 
@@ -93,15 +90,15 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
       // Weight accumulation
       expect(reading.weightKg).to.be.within(20.0, 50.0);
 
-      // Battery & Acoustics
+      // Battery & Bee counts
       expect(reading.batteryLevelPct).to.be.within(1, 100);
-      expect(reading.soundFrequencyHz).to.be.within(180, 260);
-      expect(reading.acousticsDb).to.be.within(50, 75);
+      expect(reading.beeInCount).to.be.a("number");
+      expect(reading.beeOutCount).to.be.a("number");
 
-      // Metadata
-      expect(reading.metadata.source).to.equal("simulator");
-      expect(reading.metadata.protocol).to.equal("HTTP/REST");
-      expect(reading.metadata.simulationCycle).to.equal(1);
+      // Verify no extra obsolete metadata fields are present
+      expect((reading as any).metadata).to.be.undefined;
+      expect((reading as any).soundFrequencyHz).to.be.undefined;
+      expect((reading as any).flow).to.be.undefined;
     });
 
     it("evolveDeviceState increments cycle count monotonically", function () {
@@ -211,32 +208,31 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
       const payloads = devices.map((d) => evolveDeviceState(d));
       const summary = await transmitTelemetryCycle("http://localhost:5000/api/iot/telemetry", payloads);
 
-      expect(summary.total).to.equal(5);
-      expect(summary.successful).to.equal(5);
+      expect(summary.total).to.equal(2);
+      expect(summary.successful).to.equal(2);
       expect(summary.duplicates).to.equal(0);
       expect(summary.failed).to.equal(0);
-      expect(summary.results).to.have.lengthOf(5);
+      expect(summary.results).to.have.lengthOf(2);
     });
   });
 
-  describe("5. SimulationEngine & 10-Minute Cadence Scheduler", function () {
+  describe("5. SimulationEngine & Interval Scheduler", function () {
     const originalFetch = global.fetch;
 
     afterEach(function () {
       global.fetch = originalFetch;
     });
 
-    it("initializes with fixed 10-minute cadence and prepared pending readings", function () {
+    it("initializes with configured interval and prepared pending readings", function () {
       const engine = new SimulationEngine({ targetUrl: "http://localhost:5000" });
       const status = engine.getStatus();
 
-      expect(status.intervalMs).to.equal(600000);
-      expect(status.intervalMinutes).to.equal(10);
-      expect(status.secondsRemaining).to.be.within(590, 600);
-      expect(status.hivesCount).to.equal(5);
+      expect(status.intervalMs).to.be.a("number");
+      expect(status.secondsRemaining).to.be.greaterThan(0);
+      expect(status.hivesCount).to.equal(2);
 
       const hives = engine.getAllHives();
-      expect(hives).to.have.lengthOf(5);
+      expect(hives).to.have.lengthOf(2);
       expect(hives[0].pendingPayload.temperature).to.be.a("number");
       expect(hives[0].isManipulated).to.be.false;
     });
@@ -244,21 +240,25 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
     it("updatePendingTelemetry manipulates sensor values and flags isManipulated", function () {
       const engine = new SimulationEngine({ targetUrl: "http://localhost:5000" });
       const updated = engine.updatePendingTelemetry("HIVE-SB-101", {
-        temperature: 38.65,
+        temperature: 38.6,
         humidity: 42.1,
-        weightKg: 35.12,
+        weightKg: 35.1,
         batteryLevelPct: 15,
+        beeInCount: 110,
+        beeOutCount: 95,
       });
 
-      expect(updated.temperature).to.equal(38.65);
+      expect(updated.temperature).to.equal(38.6);
       expect(updated.humidity).to.equal(42.1);
-      expect(updated.weightKg).to.equal(35.12);
+      expect(updated.weightKg).to.equal(35.1);
       expect(updated.batteryLevelPct).to.equal(15);
+      expect(updated.beeInCount).to.equal(110);
+      expect(updated.beeOutCount).to.equal(95);
 
       const hives = engine.getAllHives();
       const hiveSB101 = hives.find((h) => h.hiveId === "HIVE-SB-101");
       expect(hiveSB101?.isManipulated).to.be.true;
-      expect(hiveSB101?.pendingPayload.temperature).to.equal(38.65);
+      expect(hiveSB101?.pendingPayload.temperature).to.equal(38.6);
     });
 
     it("resetPendingTelemetry reverts manipulated values back to natural physics", function () {
@@ -276,32 +276,29 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
       const engine = new SimulationEngine({ targetUrl: "http://localhost:5000" });
 
       const swarming = engine.applyScenarioPreset("HIVE-SB-101", "swarm");
-      expect(swarming.soundFrequencyHz).to.equal(285);
-      expect(swarming.acousticsDb).to.equal(72.5);
+      expect(swarming.beeOutCount).to.equal(160);
+      expect(swarming.beeInCount).to.equal(15);
 
       const overheating = engine.applyScenarioPreset("HIVE-KV-201", "overheating");
       expect(overheating.temperature).to.equal(38.6);
     });
 
     it("transmitBatch dispatches customized telemetry and logs the event", async function () {
-      let sentBody: any = null;
-      global.fetch = async (_url, init) => {
-        sentBody = JSON.parse(init?.body as string);
-        return new Response(
+      global.fetch = async () =>
+        new Response(
           JSON.stringify({ success: true, duplicate: false, message: "Ingested" }),
           { status: 201, headers: { "Content-Type": "application/json" } }
         );
-      };
 
       const engine = new SimulationEngine({ targetUrl: "http://localhost:5000" });
-      engine.updatePendingTelemetry("HIVE-WG-301", { temperature: 38.8 });
+      engine.updatePendingTelemetry("HIVE-KV-201", { temperature: 38.8 });
 
       const summary = await engine.transmitBatch();
-      expect(summary.total).to.equal(5);
-      expect(summary.successful).to.equal(5);
+      expect(summary.total).to.equal(2);
+      expect(summary.successful).to.equal(2);
 
       const logs = engine.getLogs();
-      expect(logs.length).to.equal(5);
+      expect(logs.length).to.equal(2);
       expect(logs[0].status).to.equal(201);
     });
 
@@ -313,17 +310,16 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
         );
 
       const engine = new SimulationEngine({ targetUrl: "http://localhost:5000" });
-      const result = await engine.transmitSingleHive("HIVE-KV-202");
+      const result = await engine.transmitSingleHive("HIVE-KV-201");
 
       expect(result.success).to.be.true;
-      expect(result.hiveId).to.equal("HIVE-KV-202");
+      expect(result.hiveId).to.equal("HIVE-KV-201");
     });
 
     it("prevents concurrent re-entry when transmitBatch is already in-flight", async function () {
       let callCount = 0;
       global.fetch = async () => {
         callCount++;
-        // Simulate network delay
         await new Promise((resolve) => setTimeout(resolve, 50));
         return new Response(
           JSON.stringify({ success: true, message: "OK" }),
@@ -333,12 +329,12 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
 
       const engine = new SimulationEngine({ targetUrl: "http://localhost:5000" });
       const p1 = engine.transmitBatch();
-      const p2 = engine.transmitBatch(); // Attempt concurrent transmission while p1 is in-flight
+      const p2 = engine.transmitBatch();
 
       const [res1, res2] = await Promise.all([p1, p2]);
-      expect(res1.total).to.equal(5);
-      expect(res2.total).to.equal(0); // Second call rejected by isTransmitting guard
-      expect(callCount).to.equal(5); // Only 5 calls made, not 10
+      expect(res1.total).to.equal(2);
+      expect(res2.total).to.equal(0);
+      expect(callCount).to.equal(2);
     });
   });
 
@@ -379,7 +375,6 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
       const text = await res.text();
       expect(text).to.include("HoneyChain IoT Simulator");
       expect(text).to.include("Next Batch Auto-Transmission");
-      expect(text).to.include("10m Fixed Cadence");
     });
 
     it("GET / redirects to /ui", async function () {
@@ -392,9 +387,9 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
       const res = await originalFetch(`${baseUrl}/api/status`);
       expect(res.status).to.equal(200);
       const data = await res.json();
-      expect(data.intervalMinutes).to.equal(10);
-      expect(data.intervalMs).to.equal(600000);
+      expect(data.intervalMs).to.be.a("number");
       expect(data.secondsRemaining).to.be.a("number");
+      expect(data.hivesCount).to.equal(2);
       expect(data.targetUrl).to.equal("http://localhost:5000/api/iot/telemetry");
     });
 
@@ -402,7 +397,7 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
       const res = await originalFetch(`${baseUrl}/api/hives`);
       expect(res.status).to.equal(200);
       const hives = await res.json();
-      expect(hives).to.have.lengthOf(5);
+      expect(hives).to.have.lengthOf(2);
       expect(hives[0]).to.have.property("hiveId");
       expect(hives[0]).to.have.property("pendingPayload");
     });
@@ -411,14 +406,14 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
       const res = await originalFetch(`${baseUrl}/api/hives/HIVE-SB-101`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ temperature: 37.85, acousticsDb: 70.2 }),
+        body: JSON.stringify({ temperature: 37.8, beeInCount: 85 }),
       });
 
       expect(res.status).to.equal(200);
       const body = await res.json();
       expect(body.success).to.be.true;
-      expect(body.updated.temperature).to.equal(37.85);
-      expect(body.updated.acousticsDb).to.equal(70.2);
+      expect(body.updated.temperature).to.equal(37.8);
+      expect(body.updated.beeInCount).to.equal(85);
     });
 
     it("POST /api/hives/:hiveId/preset applies anomaly preset", async function () {
@@ -451,8 +446,8 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
 
       expect(res.status).to.equal(200);
       const summary = await res.json();
-      expect(summary.total).to.equal(5);
-      expect(summary.successful).to.equal(5);
+      expect(summary.total).to.equal(2);
+      expect(summary.successful).to.equal(2);
     });
 
     it("GET /api/logs returns transmission history and DELETE /api/logs clears it", async function () {
