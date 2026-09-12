@@ -318,6 +318,28 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
       expect(result.success).to.be.true;
       expect(result.hiveId).to.equal("HIVE-KV-202");
     });
+
+    it("prevents concurrent re-entry when transmitBatch is already in-flight", async function () {
+      let callCount = 0;
+      global.fetch = async () => {
+        callCount++;
+        // Simulate network delay
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return new Response(
+          JSON.stringify({ success: true, message: "OK" }),
+          { status: 201, headers: { "Content-Type": "application/json" } }
+        );
+      };
+
+      const engine = new SimulationEngine({ targetUrl: "http://localhost:5000" });
+      const p1 = engine.transmitBatch();
+      const p2 = engine.transmitBatch(); // Attempt concurrent transmission while p1 is in-flight
+
+      const [res1, res2] = await Promise.all([p1, p2]);
+      expect(res1.total).to.equal(5);
+      expect(res2.total).to.equal(0); // Second call rejected by isTransmitting guard
+      expect(callCount).to.equal(5); // Only 5 calls made, not 10
+    });
   });
 
   describe("6. Web Dashboard Server & REST API", function () {

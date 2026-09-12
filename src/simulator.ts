@@ -67,6 +67,7 @@ export class SimulationEngine {
   private targetUrl: string;
   private cycleIndex: number = 0;
   private isRunning: boolean = false;
+  private isTransmitting: boolean = false;
   private timer: NodeJS.Timeout | null = null;
   private recentLogs: LogEntry[] = [];
   private maxLogs: number = 100;
@@ -126,7 +127,7 @@ export class SimulationEngine {
   }
 
   /**
-   * Starts the automatic 10-minute cadence timer.
+   * Starts the automatic cadence timer.
    */
   public start(): void {
     if (this.isRunning) return;
@@ -138,7 +139,11 @@ export class SimulationEngine {
 
       const remaining = this.nextBatchTimestamp - Date.now();
       if (remaining <= 0) {
-        await this.transmitBatch();
+        if (!this.isTransmitting) {
+          // Immediately advance nextBatchTimestamp so subsequent 1-second ticks don't re-trigger while async I/O is in-flight
+          this.nextBatchTimestamp = Date.now() + this.intervalMs;
+          await this.transmitBatch();
+        }
       } else {
         this.notifyListeners({ type: "tick", data: this.getStatus() });
       }
@@ -160,65 +165,84 @@ export class SimulationEngine {
    * Transmits all pending telemetry readings in the current batch.
    */
   public async transmitBatch(targetUrl?: string): Promise<CycleSummary> {
-    const endpoint = targetUrl ? resolveTargetEndpoint(targetUrl) : this.targetUrl;
-    this.cycleIndex += 1;
-
-    const payloads: TelemetryReadingPayload[] = [];
-    for (const [hiveId, payload] of this.pendingReadings.entries()) {
-      // Refresh timestamp to transmission instant
-      payload.timestamp = new Date().toISOString();
-      payloads.push(payload);
+    if (this.isTransmitting) {
+      // Guard against concurrent re-entry
+      return {
+        total: 0,
+        successful: 0,
+        duplicates: 0,
+        failed: 0,
+        results: [],
+      };
     }
 
-    const results: TransmissionResult[] = [];
-    let successful = 0;
-    let duplicates = 0;
-    let failed = 0;
+    this.isTransmitting = true;
+    try {
+      const endpoint = targetUrl ? resolveTargetEndpoint(targetUrl) : this.targetUrl;
+      this.cycleIndex += 1;
 
-    for (const payload of payloads) {
-      const res = await sendTelemetry(endpoint, payload);
-      results.push(res);
-      this.lastResults.set(payload.hiveId, res);
-      this.lastTransmittedAt.set(payload.hiveId, new Date().toISOString());
-
-      if (res.success) {
-        if (res.duplicate) duplicates += 1;
-        else successful += 1;
-      } else {
-        failed += 1;
+      const payloads: TelemetryReadingPayload[] = [];
+      const txTime = new Date();
+      for (const [hiveId, payload] of this.pendingReadings.entries()) {
+        // Refresh timestamp to transmission instant and assign unique deterministic ID
+        payload.timestamp = txTime.toISOString();
+        payload.id = `read-${payload.deviceId}-${txTime.getTime()}`;
+        payload.readingId = payload.id;
+        payloads.push(payload);
       }
 
-      this.addLog({
-        id: `LOG-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        timestamp: new Date().toLocaleTimeString(),
-        hiveId: payload.hiveId,
-        deviceId: payload.deviceId,
-        success: res.success,
-        status: res.status,
-        duplicate: res.duplicate,
-        message: res.message || res.error,
-        temperature: payload.temperature,
-        humidity: payload.humidity,
-        weightKg: payload.weightKg,
-        flow: payload.flow,
-        batteryLevelPct: payload.batteryLevelPct,
-        soundFrequencyHz: payload.soundFrequencyHz,
-      });
+      const results: TransmissionResult[] = [];
+      let successful = 0;
+      let duplicates = 0;
+      let failed = 0;
+
+      for (const payload of payloads) {
+        const res = await sendTelemetry(endpoint, payload);
+        results.push(res);
+        this.lastResults.set(payload.hiveId, res);
+        this.lastTransmittedAt.set(payload.hiveId, new Date().toISOString());
+
+        if (res.success) {
+          if (res.duplicate) duplicates += 1;
+          else successful += 1;
+        } else {
+          failed += 1;
+        }
+
+        this.addLog({
+          id: `LOG-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          timestamp: new Date().toLocaleTimeString(),
+          hiveId: payload.hiveId,
+          deviceId: payload.deviceId,
+          success: res.success,
+          status: res.status,
+          duplicate: res.duplicate,
+          message: res.message || res.error,
+          temperature: payload.temperature,
+          humidity: payload.humidity,
+          weightKg: payload.weightKg,
+          flow: payload.flow,
+          batteryLevelPct: payload.batteryLevelPct,
+          soundFrequencyHz: payload.soundFrequencyHz,
+        });
+      }
+
+      // Schedule next cycle and reset manipulated states
+      this.prepareNextBatch();
+
+      const summary: CycleSummary = {
+        total: payloads.length,
+        successful,
+        duplicates,
+        failed,
+        results,
+      };
+
+      this.notifyListeners({ type: "transmit", data: summary });
+      return summary;
+    } finally {
+      this.isTransmitting = false;
     }
-
-    // Schedule next cycle and reset manipulated states
-    this.prepareNextBatch();
-
-    const summary: CycleSummary = {
-      total: payloads.length,
-      successful,
-      duplicates,
-      failed,
-      results,
-    };
-
-    this.notifyListeners({ type: "transmit", data: summary });
-    return summary;
   }
 
   /**
@@ -235,7 +259,10 @@ export class SimulationEngine {
     }
 
     const endpoint = targetUrl ? resolveTargetEndpoint(targetUrl) : this.targetUrl;
-    payload.timestamp = new Date().toISOString();
+    const txTime = new Date();
+    payload.timestamp = txTime.toISOString();
+    payload.id = `read-${payload.deviceId}-${txTime.getTime()}`;
+    payload.readingId = payload.id;
 
     const res = await sendTelemetry(endpoint, payload);
     this.lastResults.set(upperId, res);

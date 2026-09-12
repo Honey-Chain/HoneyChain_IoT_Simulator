@@ -1,6 +1,8 @@
 import { DeviceSimulationState } from "./devices.js";
 
 export interface TelemetryReadingPayload {
+  id?: string;
+  readingId?: string;
   deviceId: string;
   hiveId: string;
   timestamp: string;
