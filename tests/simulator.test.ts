@@ -8,7 +8,7 @@ import {
 import { getInitialDevices, defaultDevices } from "../src/devices.js";
 import { evolveDeviceState } from "../src/physics.js";
 import { sendTelemetry, transmitTelemetryCycle } from "../src/transmitter.js";
-import { SimulationEngine } from "../src/simulator.js";
+import { SimulationEngine, parseSensorOverride } from "../src/simulator.js";
 
 describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
   describe("1. Configuration & CLI Argument Parser", function () {
@@ -462,6 +462,139 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
       const res3 = await originalFetch(`${baseUrl}/api/logs`);
       const cleared = await res3.json();
       expect(cleared).to.have.lengthOf(0);
+    });
+
+    it("PUT /api/hives/:hiveId accepts explicit null and NaN overrides via REST", async function () {
+      const res = await originalFetch(`${baseUrl}/api/hives/HIVE-SB-101`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ temperature: null, humidity: "NaN" }),
+      });
+
+      expect(res.status).to.equal(200);
+      const body = await res.json();
+      expect(body.success).to.be.true;
+      expect(body.updated.temperature).to.be.null;
+      expect(body.updated.humidity).to.equal("NaN");
+    });
+  });
+
+  describe("7. Anomaly Injection & Malformed Data Transmission (NaN & null preservation)", function () {
+    const originalFetch = global.fetch;
+
+    afterEach(function () {
+      global.fetch = originalFetch;
+    });
+
+    it("parseSensorOverride strictly preserves null and string 'null' as null without coercing to 0", function () {
+      expect(parseSensorOverride(null)).to.be.null;
+      expect(parseSensorOverride("null")).to.be.null;
+      expect(parseSensorOverride("NULL")).to.be.null;
+      expect(parseSensorOverride(null)).to.not.equal(0);
+      expect(parseSensorOverride("null")).to.not.equal(0);
+    });
+
+    it("parseSensorOverride strictly preserves NaN, 'NaN', and non-numeric inputs as 'NaN' without coercing to 0", function () {
+      expect(parseSensorOverride(NaN)).to.equal("NaN");
+      expect(parseSensorOverride("NaN")).to.equal("NaN");
+      expect(parseSensorOverride("nan")).to.equal("NaN");
+      expect(parseSensorOverride("invalid-text")).to.equal("NaN");
+      expect(parseSensorOverride(NaN)).to.not.equal(0);
+      expect(parseSensorOverride("NaN")).to.not.equal(0);
+    });
+
+    it("parseSensorOverride preserves legitimate numeric 0 and numbers", function () {
+      expect(parseSensorOverride(0)).to.equal(0);
+      expect(parseSensorOverride("0")).to.equal(0);
+      expect(parseSensorOverride(35.24, 1)).to.equal(35.2);
+    });
+
+    it("updatePendingTelemetry preserves null and 'NaN' overrides across all sensors", function () {
+      const engine = new SimulationEngine({ targetUrl: "http://localhost:5000" });
+
+      const updated = engine.updatePendingTelemetry("HIVE-SB-101", {
+        temperature: null,
+        humidity: "NaN",
+        weightKg: null,
+        batteryLevelPct: "NaN",
+        beeInCount: null,
+        beeOutCount: "NaN",
+      });
+
+      expect(updated.temperature).to.be.null;
+      expect(updated.humidity).to.equal("NaN");
+      expect(updated.weightKg).to.be.null;
+      expect(updated.batteryLevelPct).to.equal("NaN");
+      expect(updated.beeInCount).to.be.null;
+      expect(updated.beeOutCount).to.equal("NaN");
+
+      // Verify none of them coerced to 0
+      expect(updated.temperature).to.not.equal(0);
+      expect(updated.humidity).to.not.equal(0);
+      expect(updated.weightKg).to.not.equal(0);
+      expect(updated.batteryLevelPct).to.not.equal(0);
+      expect(updated.beeInCount).to.not.equal(0);
+      expect(updated.beeOutCount).to.not.equal(0);
+    });
+
+    it("applyScenarioPreset applies null_temp, nan_temp, corrupt_nulls, and corrupt_nans", function () {
+      const engine = new SimulationEngine({ targetUrl: "http://localhost:5000" });
+
+      const nullTemp = engine.applyScenarioPreset("HIVE-SB-101", "null_temp");
+      expect(nullTemp.temperature).to.be.null;
+      expect(nullTemp.temperature).to.not.equal(0);
+
+      const nanTemp = engine.applyScenarioPreset("HIVE-KV-201", "nan_temp");
+      expect(nanTemp.temperature).to.equal("NaN");
+      expect(nanTemp.temperature).to.not.equal(0);
+
+      const corruptNulls = engine.applyScenarioPreset("HIVE-SB-101", "corrupt_nulls");
+      expect(corruptNulls.temperature).to.be.null;
+      expect(corruptNulls.humidity).to.be.null;
+      expect(corruptNulls.weightKg).to.be.null;
+      expect(corruptNulls.batteryLevelPct).to.be.null;
+
+      const corruptNans = engine.applyScenarioPreset("HIVE-KV-201", "corrupt_nans");
+      expect(corruptNans.temperature).to.equal("NaN");
+      expect(corruptNans.humidity).to.equal("NaN");
+      expect(corruptNans.weightKg).to.equal("NaN");
+      expect(corruptNans.batteryLevelPct).to.equal("NaN");
+    });
+
+    it("sendTelemetry serializes null as JSON null and 'NaN' as string", async function () {
+      let receivedBody: any = null;
+
+      global.fetch = async (_url: any, init: any) => {
+        receivedBody = JSON.parse(init.body);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: { message: "temperature is required and must be a valid number" },
+          }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      };
+
+      const payload = {
+        hiveId: "HIVE-SB-101",
+        deviceId: "ESP32-SB-GW-01",
+        timestamp: new Date().toISOString(),
+        temperature: null,
+        humidity: "NaN",
+        weightKg: 31.5,
+        batteryLevelPct: 95,
+        beeInCount: 100,
+        beeOutCount: 90,
+      };
+
+      const res = await sendTelemetry("http://localhost:5000/api/iot/telemetry", payload);
+      expect(receivedBody).to.not.be.null;
+      expect(receivedBody.temperature).to.be.null;
+      expect(receivedBody.temperature).to.not.equal(0);
+      expect(receivedBody.humidity).to.equal("NaN");
+      expect(res.success).to.be.false;
+      expect(res.status).to.equal(400);
+      expect(res.message).to.include("temperature is required and must be a valid number");
     });
   });
 });

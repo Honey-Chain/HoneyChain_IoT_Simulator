@@ -464,6 +464,38 @@
       outline: none;
     }
 
+    .btn-group-special {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .btn-special {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      line-height: 1.2;
+    }
+
+    .btn-special:hover {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: var(--amber-main);
+      color: #fff;
+    }
+
+    .btn-special:active {
+      transform: scale(0.95);
+    }
+
     /* Scenario Quick Presets */
     .presets-container {
       margin-bottom: 16px;
@@ -498,6 +530,18 @@
     .preset-chip:hover {
       background: rgba(245, 158, 11, 0.15);
       border-color: rgba(245, 158, 11, 0.3);
+      color: #fff;
+    }
+
+    .preset-chip.chip-danger {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .preset-chip.chip-danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.6);
       color: #fff;
     }
 
@@ -867,7 +911,11 @@
                 <span class="unit">°C</span>
               </div>
               <div class="field-input-row">
-                <input type="number" step="0.1" class="field-input" id="input-temp-${hive.hiveId}" value="${p.temperature}">
+                <input type="text" class="field-input" id="input-temp-${hive.hiveId}" value="${formatValue(p.temperature)}" placeholder="e.g. 34.8, null, NaN">
+                <div class="btn-group-special">
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-temp-${hive.hiveId}', 'null')" title="Set explicitly to null">null</button>
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-temp-${hive.hiveId}', 'NaN')" title="Set explicitly to NaN">NaN</button>
+                </div>
               </div>
             </div>
 
@@ -877,7 +925,11 @@
                 <span class="unit">%</span>
               </div>
               <div class="field-input-row">
-                <input type="number" step="0.1" class="field-input" id="input-hum-${hive.hiveId}" value="${p.humidity}">
+                <input type="text" class="field-input" id="input-hum-${hive.hiveId}" value="${formatValue(p.humidity)}" placeholder="e.g. 58.2, null, NaN">
+                <div class="btn-group-special">
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-hum-${hive.hiveId}', 'null')" title="Set explicitly to null">null</button>
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-hum-${hive.hiveId}', 'NaN')" title="Set explicitly to NaN">NaN</button>
+                </div>
               </div>
             </div>
 
@@ -887,7 +939,11 @@
                 <span class="unit">kg</span>
               </div>
               <div class="field-input-row">
-                <input type="number" step="0.1" class="field-input" id="input-weight-${hive.hiveId}" value="${p.weightKg}">
+                <input type="text" class="field-input" id="input-weight-${hive.hiveId}" value="${formatValue(p.weightKg)}" placeholder="e.g. 31.5, null, NaN">
+                <div class="btn-group-special">
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-weight-${hive.hiveId}', 'null')" title="Set explicitly to null">null</button>
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-weight-${hive.hiveId}', 'NaN')" title="Set explicitly to NaN">NaN</button>
+                </div>
               </div>
             </div>
 
@@ -897,7 +953,11 @@
                 <span class="unit">%</span>
               </div>
               <div class="field-input-row">
-                <input type="number" step="1" min="0" max="100" class="field-input" id="input-bat-${hive.hiveId}" value="${p.batteryLevelPct}">
+                <input type="text" class="field-input" id="input-bat-${hive.hiveId}" value="${formatValue(p.batteryLevelPct)}" placeholder="e.g. 95, null, NaN">
+                <div class="btn-group-special">
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-bat-${hive.hiveId}', 'null')" title="Set explicitly to null">null</button>
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-bat-${hive.hiveId}', 'NaN')" title="Set explicitly to NaN">NaN</button>
+                </div>
               </div>
             </div>
 
@@ -907,7 +967,11 @@
                 <span class="unit">bees</span>
               </div>
               <div class="field-input-row">
-                <input type="number" step="1" min="0" class="field-input" id="input-in-${hive.hiveId}" value="${p.beeInCount}">
+                <input type="text" class="field-input" id="input-in-${hive.hiveId}" value="${formatValue(p.beeInCount)}" placeholder="e.g. 120, null, NaN">
+                <div class="btn-group-special">
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-in-${hive.hiveId}', 'null')" title="Set explicitly to null">null</button>
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-in-${hive.hiveId}', 'NaN')" title="Set explicitly to NaN">NaN</button>
+                </div>
               </div>
             </div>
 
@@ -917,19 +981,27 @@
                 <span class="unit">bees</span>
               </div>
               <div class="field-input-row">
-                <input type="number" step="1" min="0" class="field-input" id="input-out-${hive.hiveId}" value="${p.beeOutCount}">
+                <input type="text" class="field-input" id="input-out-${hive.hiveId}" value="${formatValue(p.beeOutCount)}" placeholder="e.g. 115, null, NaN">
+                <div class="btn-group-special">
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-out-${hive.hiveId}', 'null')" title="Set explicitly to null">null</button>
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-out-${hive.hiveId}', 'NaN')" title="Set explicitly to NaN">NaN</button>
+                </div>
               </div>
             </div>
           </div>
 
           <div class="presets-container">
-            <div class="presets-title">Quick Simulation Presets:</div>
+            <div class="presets-title">Simulation & Anomaly Presets:</div>
             <div class="presets-buttons">
               <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'swarm')">🐝 Swarm Alert</button>
               <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'overheating')">🔥 Brood Fever</button>
               <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'chilling')">❄️ Chill Alert</button>
               <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'nectar_surge')">🍯 Nectar Surge</button>
               <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'low_battery')">🪫 Low Battery</button>
+              <button class="preset-chip chip-danger" onclick="applyPreset('${hive.hiveId}', 'null_temp')" title="Sets Brood Temp to explicit null">⚠️ Null Temp</button>
+              <button class="preset-chip chip-danger" onclick="applyPreset('${hive.hiveId}', 'nan_temp')" title="Sets Brood Temp to explicit NaN">⚠️ NaN Temp</button>
+              <button class="preset-chip chip-danger" onclick="applyPreset('${hive.hiveId}', 'corrupt_nulls')" title="Sets all sensors to explicit null">💥 All Null</button>
+              <button class="preset-chip chip-danger" onclick="applyPreset('${hive.hiveId}', 'corrupt_nans')" title="Sets all sensors to explicit NaN">💥 All NaN</button>
             </div>
           </div>
 
@@ -957,15 +1029,47 @@
       });
     }
 
+    // Helper to format values for text inputs
+    function formatValue(val) {
+      if (val === null) return 'null';
+      if (val === 'NaN' || (typeof val === 'number' && isNaN(val))) return 'NaN';
+      if (val === undefined) return '';
+      return String(val);
+    }
+
+    // Quick set inline input to null or NaN
+    function setSpecialValue(inputId, val) {
+      const el = document.getElementById(inputId);
+      if (el) {
+        el.value = val;
+        el.focus();
+        el.style.color = '#f87171';
+        setTimeout(() => {
+          if (el) el.style.color = '';
+        }, 1200);
+      }
+    }
+
+    // Helper to parse sensor input while strictly preserving null and NaN without coercing to 0
+    function parseFieldValue(raw) {
+      if (raw === undefined || raw === null) return undefined;
+      const str = String(raw).trim();
+      if (str === '') return undefined;
+      if (str.toLowerCase() === 'null') return null;
+      if (str.toLowerCase() === 'nan') return 'NaN';
+      const num = parseFloat(str);
+      return isNaN(num) ? 'NaN' : num;
+    }
+
     // Save edited values for a hive
     async function saveHiveOverrides(hiveId) {
       const overrides = {
-        temperature: parseFloat(document.getElementById(`input-temp-${hiveId}`).value),
-        humidity: parseFloat(document.getElementById(`input-hum-${hiveId}`).value),
-        weightKg: parseFloat(document.getElementById(`input-weight-${hiveId}`).value),
-        batteryLevelPct: parseInt(document.getElementById(`input-bat-${hiveId}`).value, 10),
-        beeInCount: parseInt(document.getElementById(`input-in-${hiveId}`).value, 10),
-        beeOutCount: parseInt(document.getElementById(`input-out-${hiveId}`).value, 10),
+        temperature: parseFieldValue(document.getElementById(`input-temp-${hiveId}`)?.value),
+        humidity: parseFieldValue(document.getElementById(`input-hum-${hiveId}`)?.value),
+        weightKg: parseFieldValue(document.getElementById(`input-weight-${hiveId}`)?.value),
+        batteryLevelPct: parseFieldValue(document.getElementById(`input-bat-${hiveId}`)?.value),
+        beeInCount: parseFieldValue(document.getElementById(`input-in-${hiveId}`)?.value),
+        beeOutCount: parseFieldValue(document.getElementById(`input-out-${hiveId}`)?.value),
       };
 
       try {
@@ -976,7 +1080,7 @@
         });
 
         if (res.ok) {
-          showToast(`Custom telemetry saved for ${hiveId}! Will send on next cycle or immediate send.`);
+          showToast(`Telemetry overrides saved for ${hiveId}! Will send on next cycle or immediate send.`);
           const card = document.getElementById(`card-${hiveId}`);
           if (card) card.classList.add('customized');
           const badge = document.getElementById(`status-badge-${hiveId}`);
@@ -1077,6 +1181,12 @@
       }
     }
 
+    function formatLogVal(val, unit = '') {
+      if (val === null) return '<span style="color:#f87171;font-weight:700">null</span>';
+      if (val === 'NaN' || (typeof val === 'number' && isNaN(val))) return '<span style="color:#f87171;font-weight:700">NaN</span>';
+      return `${val}${unit}`;
+    }
+
     // Render Logs Table
     function renderLogs(logs) {
       const tbody = document.getElementById('logsTableBody');
@@ -1101,12 +1211,12 @@
               ${l.status ? `HTTP ${l.status}` : 'ERR'}
             </span>
           </td>
-          <td>${l.temperature}°C</td>
-          <td>${l.humidity}%</td>
-          <td>${l.weightKg} kg</td>
-          <td>${l.batteryLevelPct}%</td>
-          <td>${l.beeInCount}</td>
-          <td>${l.beeOutCount}</td>
+          <td>${formatLogVal(l.temperature, '°C')}</td>
+          <td>${formatLogVal(l.humidity, '%')}</td>
+          <td>${formatLogVal(l.weightKg, ' kg')}</td>
+          <td>${formatLogVal(l.batteryLevelPct, '%')}</td>
+          <td>${formatLogVal(l.beeInCount)}</td>
+          <td>${formatLogVal(l.beeOutCount)}</td>
           <td style="color: ${l.success ? 'var(--text-muted)' : '#fca5a5'};">${l.message || ''}</td>
         </tr>
       `).join('');

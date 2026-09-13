@@ -4,12 +4,12 @@ export interface TelemetryReadingPayload {
   hiveId: string;
   deviceId: string;
   timestamp: string;
-  temperature: number;
-  humidity: number;
-  weightKg: number;
-  batteryLevelPct: number;
-  beeInCount: number;
-  beeOutCount: number;
+  temperature: number | null | string;
+  humidity: number | null | string;
+  weightKg: number | null | string;
+  batteryLevelPct: number | null | string;
+  beeInCount: number | null | string;
+  beeOutCount: number | null | string;
 }
 
 /**

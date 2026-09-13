@@ -20,12 +20,12 @@ export interface LogEntry {
   status?: number;
   duplicate?: boolean;
   message?: string;
-  temperature: number;
-  humidity: number;
-  weightKg: number;
-  batteryLevelPct: number;
-  beeInCount: number;
-  beeOutCount: number;
+  temperature: number | null | string;
+  humidity: number | null | string;
+  weightKg: number | null | string;
+  batteryLevelPct: number | null | string;
+  beeInCount: number | null | string;
+  beeOutCount: number | null | string;
 }
 
 export interface HiveStatus {
@@ -48,6 +48,46 @@ export interface SimulatorStatus {
   targetUrl: string;
   hivesCount: number;
   isRunning: boolean;
+}
+
+export type ScenarioPreset =
+  | "swarm"
+  | "overheating"
+  | "chilling"
+  | "nectar_surge"
+  | "low_battery"
+  | "null_temp"
+  | "nan_temp"
+  | "corrupt_nulls"
+  | "corrupt_nans";
+
+/**
+ * Normalizes input override values while strictly preserving explicit null and NaN values.
+ * Prevents JavaScript from implicitly coercing null into 0.
+ */
+export function parseSensorOverride(
+  val: any,
+  decimals?: number
+): number | null | string | undefined {
+  if (val === undefined) return undefined;
+  if (typeof val === "string" && val.trim() === "") return undefined;
+  if (val === null || val === "null" || val === "NULL") return null;
+  if (
+    val === "NaN" ||
+    val === "nan" ||
+    val === "NAN" ||
+    (typeof val === "number" && isNaN(val))
+  ) {
+    return "NaN";
+  }
+
+  const parsed = typeof val === "number" ? val : parseFloat(val);
+  if (isNaN(parsed)) return "NaN";
+
+  if (decimals !== undefined) {
+    return Number(parsed.toFixed(decimals));
+  }
+  return parsed;
 }
 
 export type SimulatorEventCallback = (event: {
@@ -307,25 +347,39 @@ export class SimulationEngine {
     }
 
     if (overrides.temperature !== undefined) {
-      current.temperature = Number(Number(overrides.temperature).toFixed(1));
+      const val = parseSensorOverride(overrides.temperature, 1);
+      if (val !== undefined) current.temperature = val;
     }
     if (overrides.humidity !== undefined) {
-      current.humidity = Number(Number(overrides.humidity).toFixed(1));
+      const val = parseSensorOverride(overrides.humidity, 1);
+      if (val !== undefined) current.humidity = val;
     }
     if (overrides.weightKg !== undefined) {
-      current.weightKg = Number(Number(overrides.weightKg).toFixed(1));
+      const val = parseSensorOverride(overrides.weightKg, 1);
+      if (val !== undefined) current.weightKg = val;
     }
     if (overrides.batteryLevelPct !== undefined) {
-      current.batteryLevelPct = Math.max(
-        0,
-        Math.min(100, Math.round(Number(overrides.batteryLevelPct)))
-      );
+      const val = parseSensorOverride(overrides.batteryLevelPct);
+      if (val !== undefined) {
+        current.batteryLevelPct =
+          typeof val === "number"
+            ? Math.max(0, Math.min(100, Math.round(val)))
+            : val;
+      }
     }
     if (overrides.beeInCount !== undefined) {
-      current.beeInCount = Math.max(0, Math.round(Number(overrides.beeInCount)));
+      const val = parseSensorOverride(overrides.beeInCount);
+      if (val !== undefined) {
+        current.beeInCount =
+          typeof val === "number" ? Math.max(0, Math.round(val)) : val;
+      }
     }
     if (overrides.beeOutCount !== undefined) {
-      current.beeOutCount = Math.max(0, Math.round(Number(overrides.beeOutCount)));
+      const val = parseSensorOverride(overrides.beeOutCount);
+      if (val !== undefined) {
+        current.beeOutCount =
+          typeof val === "number" ? Math.max(0, Math.round(val)) : val;
+      }
     }
 
     this.isManipulated.set(upperId, true);
@@ -356,7 +410,7 @@ export class SimulationEngine {
    */
   public applyScenarioPreset(
     hiveId: string,
-    preset: "swarm" | "overheating" | "chilling" | "nectar_surge" | "low_battery"
+    preset: ScenarioPreset
   ): TelemetryReadingPayload {
     const upperId = hiveId.toUpperCase();
     const current = this.pendingReadings.get(upperId);
@@ -382,13 +436,38 @@ export class SimulationEngine {
         });
       case "nectar_surge":
         return this.updatePendingTelemetry(upperId, {
-          weightKg: Number((current.weightKg + 0.85).toFixed(1)),
+          weightKg:
+            typeof current.weightKg === "number"
+              ? Number((current.weightKg + 0.85).toFixed(1))
+              : 35.0,
           beeInCount: 135,
           beeOutCount: 85,
         });
       case "low_battery":
         return this.updatePendingTelemetry(upperId, {
           batteryLevelPct: 8,
+        });
+      case "null_temp":
+        return this.updatePendingTelemetry(upperId, {
+          temperature: null,
+        });
+      case "nan_temp":
+        return this.updatePendingTelemetry(upperId, {
+          temperature: "NaN",
+        });
+      case "corrupt_nulls":
+        return this.updatePendingTelemetry(upperId, {
+          temperature: null,
+          humidity: null,
+          weightKg: null,
+          batteryLevelPct: null,
+        });
+      case "corrupt_nans":
+        return this.updatePendingTelemetry(upperId, {
+          temperature: "NaN",
+          humidity: "NaN",
+          weightKg: "NaN",
+          batteryLevelPct: "NaN",
         });
       default:
         return current;
