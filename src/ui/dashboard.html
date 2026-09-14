@@ -6,36 +6,45 @@
   <title>HoneyChain IoT Simulator — Edge Telemetry & Apiary Gateway Console</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #070a13;
-      --bg-surface: #0e1526;
-      --bg-surface-elevated: #141e34;
-      --bg-card-outer: rgba(16, 24, 43, 0.7);
-      --bg-card-inner: rgba(11, 17, 31, 0.85);
-      --border-outer: rgba(255, 255, 255, 0.08);
-      --border-inner: rgba(255, 255, 255, 0.05);
-      --border-amber: rgba(245, 158, 11, 0.35);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-faint: #64748b;
+      --bg-root: #09090b;
+      --bg-card: #111114;
+      --bg-card-subtle: #16161b;
+      --bg-field: #0d0d10;
+      --border-subtle: rgba(255, 255, 255, 0.07);
+      --border-medium: rgba(255, 255, 255, 0.12);
+      --border-hover: rgba(255, 255, 255, 0.22);
+      
+      --text-primary: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --text-faint: #52525b;
+      
       --amber-main: #f59e0b;
       --amber-light: #fbbf24;
-      --amber-glow: rgba(245, 158, 11, 0.22);
-      --amber-subtle: rgba(245, 158, 11, 0.1);
+      --amber-subtle: rgba(245, 158, 11, 0.12);
+      --amber-border: rgba(245, 158, 11, 0.3);
+      
       --green-main: #10b981;
-      --green-glow: rgba(16, 185, 129, 0.22);
-      --red-main: #ef4444;
-      --red-glow: rgba(239, 68, 68, 0.25);
-      --cyan-main: #06b6d4;
-      --cyan-glow: rgba(6, 182, 212, 0.2);
-      --purple-main: #8b5cf6;
-      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-      --radius-bezel: 20px;
-      --radius-inner: 14px;
-      --radius-sm: 8px;
+      --green-subtle: rgba(16, 185, 129, 0.12);
+      --green-border: rgba(16, 185, 129, 0.25);
+      
+      --rose-main: #f43f5e;
+      --rose-subtle: rgba(244, 63, 94, 0.12);
+      --rose-border: rgba(244, 63, 94, 0.25);
+      
+      --blue-main: #38bdf8;
+      --blue-subtle: rgba(56, 189, 248, 0.12);
+      --blue-border: rgba(56, 189, 248, 0.25);
+      
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+      
+      --radius-lg: 14px;
+      --radius-md: 8px;
+      --radius-sm: 5px;
     }
 
     * {
@@ -45,82 +54,60 @@
     }
 
     body {
-      background-color: var(--bg-dark);
+      background-color: var(--bg-root);
       background-image: 
-        radial-gradient(circle at 12% 12%, rgba(245, 158, 11, 0.07) 0%, transparent 45%),
-        radial-gradient(circle at 88% 30%, rgba(6, 182, 212, 0.06) 0%, transparent 40%),
-        radial-gradient(circle at 50% 90%, rgba(139, 92, 246, 0.04) 0%, transparent 50%),
-        linear-gradient(to bottom, rgba(7, 10, 19, 0.95), rgba(7, 10, 19, 1));
-      background-attachment: fixed;
-      color: var(--text-main);
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245, 158, 11, 0.05), transparent 70%),
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.02), transparent 40%);
+      color: var(--text-primary);
       font-family: var(--font-sans);
       min-height: 100vh;
-      padding: 28px 24px;
+      padding: 32px 24px 60px;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
-    }
-
-    /* Ambient Hexagonal Grid Underlay */
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-      background-size: 32px 32px;
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.6;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     .container {
-      max-width: 1420px;
+      max-width: 1400px;
       margin: 0 auto;
-      position: relative;
-      z-index: 1;
     }
 
-    /* Header Bar */
+    /* Sleek Header Bar */
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 20px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--border-outer);
-      margin-bottom: 28px;
+      gap: 16px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 26px;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
     }
 
-    .brand-logo-bezel {
-      padding: 3px;
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      border-radius: 14px;
-      box-shadow: 0 4px 20px var(--amber-glow);
-    }
-
-    .brand-logo {
-      font-size: 26px;
-      background: linear-gradient(135deg, #fbbf24, #d97706);
-      width: 44px;
-      height: 44px;
+    .brand-logo-wrap {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0.04));
+      border: 1px solid var(--amber-border);
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 11px;
+      color: var(--amber-light);
+      flex-shrink: 0;
     }
 
     .brand-text h1 {
-      font-size: 21px;
-      font-weight: 800;
-      letter-spacing: -0.025em;
-      color: #fff;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
       display: flex;
       align-items: center;
       gap: 10px;
@@ -128,100 +115,99 @@
 
     .brand-badge {
       font-family: var(--font-mono);
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      background: rgba(245, 158, 11, 0.15);
-      color: var(--amber-light);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      padding: 2px 7px;
+      font-size: 11px;
+      font-weight: 500;
+      background: var(--bg-card-subtle);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      padding: 2px 8px;
       border-radius: 9999px;
+      letter-spacing: 0.04em;
     }
 
     .brand-text p {
       font-size: 13px;
       color: var(--text-muted);
-      font-weight: 500;
+      margin-top: 1px;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
       gap: 12px;
-      flex-wrap: wrap;
     }
 
     .endpoint-pill {
       display: flex;
       align-items: center;
-      gap: 10px;
-      background: rgba(14, 21, 38, 0.85);
-      border: 1px solid var(--border-outer);
-      padding: 8px 16px;
+      gap: 9px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 14px;
       border-radius: 9999px;
       font-family: var(--font-mono);
       font-size: 12px;
-      color: var(--text-muted);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      transition: border-color 0.2s;
     }
 
-    .status-pulse {
+    .endpoint-pill:hover {
+      border-color: var(--border-medium);
+    }
+
+    .status-dot-pulse {
       display: inline-flex;
       position: relative;
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
     }
 
-    .status-pulse .dot {
-      width: 8px;
-      height: 8px;
+    .status-dot-pulse .dot {
+      width: 7px;
+      height: 7px;
       background: var(--green-main);
       border-radius: 50%;
     }
 
-    .status-pulse .ping {
+    .status-dot-pulse .ping {
       position: absolute;
       inset: -2px;
       border-radius: 50%;
       background: var(--green-main);
-      opacity: 0.7;
-      animation: pulsePing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+      opacity: 0.6;
+      animation: pulsePing 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
     }
 
     @keyframes pulsePing {
       75%, 100% {
-        transform: scale(2.2);
+        transform: scale(2.4);
         opacity: 0;
       }
     }
 
-    /* Master HUD Banner (Double Bezel Architecture) */
+    /* Master Cadence HUD */
     .master-hud {
-      margin-bottom: 32px;
-      background: var(--bg-card-outer);
-      border: 1px solid var(--border-outer);
-      border-radius: var(--radius-bezel);
-      padding: 4px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 22px 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
       position: relative;
       overflow: hidden;
     }
 
-    .master-hud::after {
+    .master-hud::before {
       content: '';
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--amber-main), var(--cyan-main), var(--purple-main));
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.35), transparent);
     }
 
-    .hud-inner {
-      background: var(--bg-card-inner);
-      border: 1px solid var(--border-inner);
-      border-radius: var(--radius-inner);
-      padding: 24px 30px;
+    .hud-grid {
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
@@ -229,47 +215,45 @@
     }
 
     @media (max-width: 960px) {
-      .hud-inner {
+      .hud-grid {
         grid-template-columns: 1fr;
-        gap: 24px;
+        gap: 20px;
       }
     }
 
-    /* Circular SVG Gauge */
     .gauge-block {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 18px;
     }
 
     .gauge-ring-wrapper {
       position: relative;
-      width: 88px;
-      height: 88px;
+      width: 76px;
+      height: 76px;
       flex-shrink: 0;
     }
 
     .gauge-svg {
       transform: rotate(-90deg);
-      width: 88px;
-      height: 88px;
+      width: 76px;
+      height: 76px;
     }
 
     .gauge-bg {
       fill: none;
-      stroke: rgba(255, 255, 255, 0.08);
-      stroke-width: 6;
+      stroke: rgba(255, 255, 255, 0.06);
+      stroke-width: 4;
     }
 
     .gauge-progress {
       fill: none;
-      stroke: url(#amberGradient);
-      stroke-width: 6;
+      stroke: var(--amber-main);
+      stroke-width: 4;
       stroke-linecap: round;
-      stroke-dasharray: 264;
+      stroke-dasharray: 238.76;
       stroke-dashoffset: 0;
-      transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-      filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.4));
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .gauge-center-icon {
@@ -278,24 +262,24 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      color: var(--amber-main);
     }
 
     .timer-readout h2 {
       font-size: 11px;
-      font-weight: 700;
-      color: var(--text-faint);
+      font-weight: 600;
+      color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.08em;
       margin-bottom: 2px;
     }
 
     .timer-readout .countdown-digits {
       font-family: var(--font-mono);
-      font-size: 38px;
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: -0.03em;
+      font-size: 34px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
       display: flex;
       align-items: baseline;
       gap: 8px;
@@ -305,14 +289,13 @@
       font-family: var(--font-mono);
       font-size: 12px;
       color: var(--amber-light);
-      font-weight: 600;
+      font-weight: 500;
     }
 
-    /* Cadence & Progress Bar Section */
     .hud-meta {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 9px;
     }
 
     .hud-meta-header {
@@ -324,18 +307,19 @@
 
     .cadence-chip {
       background: var(--amber-subtle);
-      border: 1px solid var(--border-amber);
+      border: 1px solid var(--amber-border);
       color: var(--amber-light);
-      padding: 3px 10px;
+      padding: 2px 9px;
       border-radius: 9999px;
       font-family: var(--font-mono);
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 500;
+      letter-spacing: 0.02em;
     }
 
     .meta-metrics {
       display: flex;
-      gap: 16px;
+      gap: 14px;
       font-family: var(--font-mono);
       color: var(--text-muted);
       font-size: 12px;
@@ -343,8 +327,8 @@
 
     .progress-track {
       background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-inner);
-      height: 7px;
+      border: 1px solid var(--border-subtle);
+      height: 4px;
       border-radius: 9999px;
       overflow: hidden;
       position: relative;
@@ -353,128 +337,130 @@
     .progress-bar-fill {
       height: 100%;
       background: linear-gradient(90deg, var(--amber-main), var(--amber-light));
-      border-radius: 9999px;
       width: 0%;
-      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 0 10px var(--amber-glow);
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* Button-in-Button Primary Action */
-    .btn-island-primary {
+    .btn-primary-batch {
       display: inline-flex;
       align-items: center;
-      gap: 14px;
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: #000;
-      border: none;
+      gap: 8px;
+      background: var(--amber-main);
+      color: #09090b;
       font-family: var(--font-sans);
-      font-size: 14px;
-      font-weight: 700;
-      padding: 8px 10px 8px 22px;
-      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      border: none;
       cursor: pointer;
-      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
-      transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2), 0 0 16px rgba(245, 158, 11, 0.2);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
     }
 
-    .btn-island-primary:hover {
+    .btn-primary-batch:hover {
+      background: var(--amber-light);
       transform: translateY(-1px);
-      box-shadow: 0 6px 26px rgba(245, 158, 11, 0.45);
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
     }
 
-    .btn-island-primary:active {
-      transform: scale(0.98);
+    .btn-primary-batch:active {
+      transform: translateY(0);
     }
 
-    .btn-icon-core {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: rgba(0, 0, 0, 0.15);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      transition: transform 0.2s ease;
+    .btn-primary-batch:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
 
-    .btn-island-primary:hover .btn-icon-core {
-      transform: translate(2px, -1px);
-    }
-
-    /* Status Ribbon Bar */
+    /* Status Ribbon */
     .status-ribbon {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .status-ribbon {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .status-ribbon {
+        grid-template-columns: 1fr;
+      }
     }
 
     .ribbon-item {
-      background: var(--bg-card-outer);
-      border: 1px solid var(--border-outer);
-      border-radius: 14px;
-      padding: 14px 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
       display: flex;
       align-items: center;
-      gap: 14px;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.04);
+      gap: 12px;
+      transition: border-color 0.2s;
+    }
+
+    .ribbon-item:hover {
+      border-color: var(--border-medium);
     }
 
     .ribbon-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.05);
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 17px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
     }
 
     .ribbon-label {
       font-size: 11px;
+      color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-faint);
-      font-weight: 600;
+      letter-spacing: 0.05em;
+      font-weight: 500;
     }
 
     .ribbon-val {
       font-family: var(--font-mono);
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-main);
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    /* Section Headers */
+    /* Section Headings */
     .section-header {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
 
     .section-title {
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .section-title::before {
-      content: '';
-      display: inline-block;
-      width: 4px;
-      height: 16px;
-      background: var(--amber-main);
-      border-radius: 2px;
-    }
-
-    .section-subtitle {
+    .section-desc {
       font-size: 12px;
       color: var(--text-muted);
     }
@@ -482,52 +468,42 @@
     /* Hives Grid */
     .hives-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
-      gap: 24px;
-      margin-bottom: 40px;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 20px;
+      margin-bottom: 26px;
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 600px) {
       .hives-grid {
         grid-template-columns: 1fr;
       }
     }
 
-    /* Double Bezel Hive Card */
-    .hive-card-shell {
-      background: var(--bg-card-outer);
-      border: 1px solid var(--border-outer);
-      border-radius: var(--radius-bezel);
-      padding: 5px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-      transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
-    }
-
-    .hive-card-shell:hover {
-      border-color: rgba(255, 255, 255, 0.14);
-      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
-    }
-
-    .hive-card-shell.customized {
-      border-color: var(--border-amber);
-      box-shadow: 0 10px 30px var(--amber-glow);
-    }
-
-    .hive-card-core {
-      background: var(--bg-card-inner);
-      border: 1px solid var(--border-inner);
-      border-radius: var(--radius-inner);
+    .hive-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
       padding: 22px;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      position: relative;
     }
 
-    .hive-header {
+    .hive-card:hover {
+      border-color: var(--border-medium);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .hive-card.customized {
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+
+    .hive-card-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border-inner);
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .hive-id-badge {
@@ -537,34 +513,37 @@
     }
 
     .hive-icon-wrap {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: rgba(245, 158, 11, 0.12);
-      border: 1px solid rgba(245, 158, 11, 0.25);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid var(--amber-border);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      color: var(--amber-main);
+      flex-shrink: 0;
     }
 
     .hive-title-group h3 {
-      font-size: 17px;
-      font-weight: 800;
-      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
       letter-spacing: -0.01em;
     }
 
     .hive-meta {
       font-family: var(--font-mono);
       font-size: 11px;
-      color: var(--text-faint);
+      color: var(--text-muted);
+      margin-top: 1px;
     }
 
     .status-badge {
       font-family: var(--font-mono);
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 500;
       padding: 4px 10px;
       border-radius: 9999px;
       display: inline-flex;
@@ -573,437 +552,541 @@
     }
 
     .badge-auto {
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.28);
-      color: #34d399;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
     }
 
     .badge-custom {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.35);
+      background: var(--amber-subtle);
       color: var(--amber-light);
+      border: 1px solid var(--amber-border);
     }
 
-    /* Sensor Grid */
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* Sensor Fields Grid */
     .fields-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
-    @media (max-width: 520px) {
+    @media (max-width: 480px) {
       .fields-grid {
         grid-template-columns: 1fr;
       }
     }
 
     .field-card {
-      background: rgba(6, 10, 20, 0.6);
-      border: 1px solid var(--border-inner);
-      border-radius: var(--radius-sm);
+      background: var(--bg-field);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
       padding: 10px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      transition: border-color 0.15s ease;
+      transition: border-color 0.15s, background-color 0.15s;
     }
 
     .field-card:focus-within {
-      border-color: var(--amber-main);
-      box-shadow: 0 0 0 1px var(--amber-main);
+      border-color: rgba(245, 158, 11, 0.4);
+      background-color: var(--bg-card-subtle);
     }
 
     .field-header {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
+      align-items: center;
       font-size: 11px;
-      font-weight: 600;
       color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
     }
 
     .field-unit {
       font-family: var(--font-mono);
       font-size: 10px;
-      color: var(--amber-main);
+      color: var(--text-faint);
     }
 
     .field-input-row {
       display: flex;
       align-items: center;
       gap: 6px;
+      margin-bottom: 6px;
     }
 
     .field-input {
       background: transparent;
       border: none;
-      color: #fff;
+      color: var(--text-primary);
       font-family: var(--font-mono);
-      font-size: 15px;
-      font-weight: 700;
+      font-size: 14px;
+      font-weight: 500;
       width: 100%;
       outline: none;
     }
 
     .field-input::placeholder {
-      color: rgba(255, 255, 255, 0.18);
-      font-size: 13px;
+      color: var(--text-faint);
+      font-size: 12px;
     }
 
-    /* Quick Null / NaN Action Chips */
     .btn-group-special {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 3px;
-      margin-left: auto;
+      gap: 4px;
       flex-shrink: 0;
     }
 
     .btn-special {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-faint);
+      padding: 2px 7px;
       font-family: var(--font-mono);
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
+      font-size: 10.5px;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
       cursor: pointer;
       transition: all 0.15s ease;
-      line-height: 1.2;
     }
 
     .btn-special:hover {
-      background: rgba(245, 158, 11, 0.2);
-      border-color: var(--amber-main);
-      color: #fff;
-    }
-
-    .btn-special:active {
-      transform: scale(0.95);
-    }
-
-    /* Sensor Range Indicator Guide */
-    .sensor-guide {
-      height: 3px;
+      color: var(--text-primary);
       background: rgba(255, 255, 255, 0.08);
-      border-radius: 2px;
+      border-color: var(--border-hover);
+    }
+
+    .sensor-guide {
+      height: 2px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 9999px;
       overflow: hidden;
-      margin-top: 2px;
     }
 
     .sensor-guide-fill {
       height: 100%;
-      border-radius: 2px;
-      transition: width 0.4s ease;
+      border-radius: 9999px;
+      transition: width 0.3s ease, background 0.3s ease;
     }
 
-    /* Preset Sections */
-    .presets-container {
-      margin-bottom: 20px;
+    /* Presets Section */
+    .presets-section {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
       padding: 12px 14px;
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid var(--border-inner);
-      border-radius: var(--radius-sm);
+      margin-bottom: 18px;
     }
 
-    .presets-group-title {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--text-faint);
+    .presets-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .presets-label {
+      font-size: 10.5px;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 8px;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+      color: var(--text-muted);
     }
 
-    .presets-buttons {
+    .presets-label-danger {
+      color: #fda4af;
+    }
+
+    .presets-chips {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-bottom: 8px;
     }
 
-    .presets-buttons:last-child {
-      margin-bottom: 0;
-    }
-
-    .preset-chip {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-inner);
-      color: var(--text-muted);
-      padding: 4px 9px;
+    .preset-pill {
       font-size: 11px;
       font-weight: 500;
-      border-radius: 6px;
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 9999px;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .preset-chip:hover {
-      background: rgba(245, 158, 11, 0.15);
-      border-color: rgba(245, 158, 11, 0.35);
-      color: #fff;
+    .preset-pill:hover {
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text-primary);
+      border-color: var(--border-medium);
       transform: translateY(-1px);
     }
 
-    .preset-chip:active {
-      transform: scale(0.97);
+    .preset-pill.pill-danger {
+      color: #fda4af;
+      background: rgba(244, 63, 94, 0.05);
+      border-color: rgba(244, 63, 94, 0.2);
     }
 
-    .preset-chip.chip-danger {
-      background: rgba(239, 68, 68, 0.08);
-      border-color: rgba(239, 68, 68, 0.25);
-      color: #fca5a5;
-    }
-
-    .preset-chip.chip-danger:hover {
-      background: rgba(239, 68, 68, 0.22);
-      border-color: rgba(239, 68, 68, 0.5);
+    .preset-pill.pill-danger:hover {
+      background: rgba(244, 63, 94, 0.12);
       color: #fff;
+      border-color: rgba(244, 63, 94, 0.4);
     }
 
-    /* Card Actions Footer */
+    /* Card Footer Actions */
     .card-actions {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border-inner);
       flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
     }
 
     .last-tx-info {
-      font-size: 11px;
-      color: var(--text-faint);
       font-family: var(--font-mono);
-      max-width: 240px;
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
+      max-width: 220px;
     }
 
     .actions-button-group {
       display: flex;
-      gap: 8px;
       align-items: center;
+      gap: 8px;
     }
 
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border-outer);
-      color: var(--text-main);
-      padding: 6px 14px;
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      border-color: var(--border-medium);
+    }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--border-medium);
+    }
+
+    .btn-action-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--amber-main);
+      border: none;
+      color: #09090b;
+      font-family: var(--font-sans);
       font-size: 12px;
       font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    .btn-secondary:active {
-      transform: scale(0.97);
-    }
-
-    .btn-primary-sm {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      border: none;
-      color: #000;
       padding: 6px 14px;
-      font-size: 12px;
-      font-weight: 700;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
       transition: all 0.15s ease;
-      box-shadow: 0 2px 10px rgba(245, 158, 11, 0.25);
     }
 
-    .btn-primary-sm:hover {
-      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
-      transform: translateY(-1px);
+    .btn-action-primary:hover {
+      background: var(--amber-light);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
     }
 
-    .btn-primary-sm:active {
-      transform: scale(0.97);
+    /* Sleek Telemetry Logs Panel */
+    .logs-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
     }
 
-    /* Logs & Telemetry Audit Feed Section */
-    .logs-section {
-      background: var(--bg-card-outer);
-      border: 1px solid var(--border-outer);
-      border-radius: var(--radius-bezel);
-      padding: 5px;
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
-      margin-bottom: 40px;
+    .logs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 16px;
     }
 
-    .logs-core {
-      background: var(--bg-card-inner);
-      border: 1px solid var(--border-inner);
-      border-radius: var(--radius-inner);
-      padding: 24px;
+    .logs-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logs-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
     }
 
     .logs-toolbar {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 16px;
       flex-wrap: wrap;
-      margin-bottom: 18px;
+      gap: 10px;
     }
 
-    .logs-filter-tabs {
-      display: flex;
-      gap: 6px;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 4px;
-      border-radius: 10px;
-      border: 1px solid var(--border-inner);
-    }
-
-    .tab-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-family: var(--font-sans);
-      font-size: 12px;
-      font-weight: 600;
-      padding: 5px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .tab-btn.active {
-      background: rgba(255, 255, 255, 0.09);
-      color: #fff;
-    }
-
-    .logs-search-box {
+    .search-box {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--border-inner);
-      padding: 6px 12px;
-      border-radius: 8px;
-      width: 260px;
+      background: var(--bg-field);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 5px 10px;
+      color: var(--text-muted);
+      width: 220px;
+      transition: border-color 0.15s;
     }
 
-    .logs-search-box input {
+    .search-box:focus-within {
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+
+    .search-box input {
       background: transparent;
       border: none;
-      color: #fff;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
       font-size: 12px;
-      font-family: var(--font-mono);
       outline: none;
       width: 100%;
     }
 
-    .logs-search-box input::placeholder {
+    .search-box input::placeholder {
       color: var(--text-faint);
     }
 
-    .logs-table-wrapper {
-      overflow-x: auto;
-      border: 1px solid var(--border-inner);
+    .filter-tabs {
+      display: inline-flex;
+      background: var(--bg-field);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
+      padding: 2px;
+      gap: 2px;
     }
 
-    .logs-table {
+    .filter-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .filter-tab.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+    }
+
+    .filter-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+    }
+
+    .filter-tab.active .filter-badge {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--text-primary);
+    }
+
+    .btn-clear {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 11px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-clear:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      border-color: var(--border-medium);
+    }
+
+    /* Logs Table */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+
+    table {
       width: 100%;
       border-collapse: collapse;
-      font-family: var(--font-mono);
       font-size: 12px;
       text-align: left;
     }
 
-    .logs-table th {
-      background: rgba(255, 255, 255, 0.03);
+    th {
+      background: var(--bg-field);
+      color: var(--text-muted);
       padding: 10px 14px;
-      color: var(--text-faint);
       font-weight: 600;
-      border-bottom: 1px solid var(--border-inner);
-      white-space: nowrap;
+      font-size: 11px;
       text-transform: uppercase;
-      font-size: 10px;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
-    .logs-table td {
-      padding: 12px 14px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      white-space: nowrap;
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+      vertical-align: middle;
     }
 
-    .logs-table tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
+    tr:last-child td {
+      border-bottom: none;
     }
 
-    .pill-status {
-      font-size: 10px;
-      font-weight: 700;
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
       padding: 2px 7px;
       border-radius: 4px;
-      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      font-family: var(--font-mono);
     }
 
-    .pill-201 {
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.3);
+    .badge-201 {
+      background: var(--green-subtle);
+      color: var(--green-main);
+      border: 1px solid var(--green-border);
     }
 
-    .pill-200 {
-      background: rgba(6, 182, 212, 0.15);
-      color: #22d3ee;
-      border: 1px solid rgba(6, 182, 212, 0.3);
+    .badge-400 {
+      background: var(--rose-subtle);
+      color: var(--rose-main);
+      border: 1px solid var(--rose-border);
     }
 
-    .pill-err {
-      background: rgba(239, 68, 68, 0.15);
-      color: #fca5a5;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+    .badge-200 {
+      background: var(--blue-subtle);
+      color: var(--blue-main);
+      border: 1px solid var(--blue-border);
     }
 
-    .tag-danger-val {
-      color: #f87171;
-      font-weight: 700;
-      background: rgba(239, 68, 68, 0.15);
-      padding: 1px 4px;
-      border-radius: 3px;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+    .badge-net {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
     }
 
-    /* Toast Notifications */
+    .empty-state {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Expandable Log Details */
+    .row-expanded {
+      background: rgba(255, 255, 255, 0.02) !important;
+    }
+
+    .payload-pre {
+      background: var(--bg-root);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    /* Toast Notification */
     #toast {
       position: fixed;
-      bottom: 28px;
-      right: 28px;
-      background: rgba(14, 21, 38, 0.95);
-      border: 1px solid var(--border-amber);
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 12px;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(17, 17, 20, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-medium);
+      color: var(--text-primary);
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--amber-glow);
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       opacity: 0;
-      transform: translateY(16px);
+      transform: translateY(12px);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       pointer-events: none;
-      transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
       z-index: 1000;
-      backdrop-filter: blur(16px);
     }
 
     #toast.show {
@@ -1013,24 +1096,29 @@
     }
 
     #toastIcon {
-      color: var(--amber-light);
-      font-size: 16px;
+      color: var(--amber-main);
+      display: flex;
+      align-items: center;
     }
 
-    /* Footer Note */
     footer {
-      text-align: center;
-      padding: 24px 0 16px;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       font-size: 12px;
-      color: var(--text-faint);
-      border-top: 1px solid var(--border-outer);
-      font-family: var(--font-mono);
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     footer a {
-      color: var(--amber-main);
+      color: var(--amber-light);
       text-decoration: none;
     }
+
     footer a:hover {
       text-decoration: underline;
     }
@@ -1041,43 +1129,47 @@
     <!-- Header -->
     <header>
       <div class="brand">
-        <div class="brand-logo-bezel">
-          <div class="brand-logo">🐝</div>
+        <div class="brand-logo-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L21 7.2V16.8L12 22L3 16.8V7.2L12 2Z"/>
+            <path d="M12 8V16"/>
+            <path d="M12 12L19 16"/>
+            <path d="M12 12L5 16"/>
+          </svg>
         </div>
         <div class="brand-text">
-          <h1>HoneyChain IoT Simulator <span class="brand-badge">v2.1 Edge</span></h1>
+          <h1>HoneyChain IoT Simulator <span class="brand-badge">v2.1</span></h1>
           <p>Smart Apiary Autonomous Telemetry Dispatcher & Anomaly Injection Engine</p>
         </div>
       </div>
       <div class="header-actions">
         <div class="endpoint-pill" title="Ingestion Target REST Endpoint">
-          <div class="status-pulse">
+          <div class="status-dot-pulse">
             <div class="ping"></div>
             <div class="dot"></div>
           </div>
           <span>Target:</span>
-          <strong id="targetUrlDisplay" style="color: #fff;">Connecting...</strong>
+          <strong id="targetUrlDisplay" style="color: var(--text-primary);">Connecting...</strong>
         </div>
       </div>
     </header>
 
-    <!-- Master HUD Banner -->
+    <!-- Master Cadence HUD -->
     <div class="master-hud">
-      <div class="hud-inner">
-        <!-- Circular SVG Countdown Gauge -->
+      <div class="hud-grid">
+        <!-- Circular SVG Gauge -->
         <div class="gauge-block">
           <div class="gauge-ring-wrapper">
-            <svg class="gauge-svg" viewBox="0 0 96 96">
-              <defs>
-                <linearGradient id="amberGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#f59e0b" />
-                  <stop offset="100%" stop-color="#fbbf24" />
-                </linearGradient>
-              </defs>
-              <circle class="gauge-bg" cx="48" cy="48" r="42" />
-              <circle class="gauge-progress" id="gaugeCircle" cx="48" cy="48" r="42" />
+            <svg class="gauge-svg" viewBox="0 0 84 84">
+              <circle class="gauge-bg" cx="42" cy="42" r="38" />
+              <circle class="gauge-progress" id="gaugeCircle" cx="42" cy="42" r="38" />
             </svg>
-            <div class="gauge-center-icon">⏱️</div>
+            <div class="gauge-center-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
           </div>
           <div class="timer-readout">
             <h2>Next Batch Auto-Transmission</h2>
@@ -1091,7 +1183,7 @@
         <!-- Progress & Cadence Meta -->
         <div class="hud-meta">
           <div class="hud-meta-header">
-            <span class="cadence-chip" id="cadenceBadge">⏱️ 10m Cadence (.env)</span>
+            <span class="cadence-chip" id="cadenceBadge">10m Cadence (.env)</span>
             <div class="meta-metrics">
               <span id="progressPct">0%</span>
               <span id="cycleCountDisplay">Cycle #0</span>
@@ -1103,11 +1195,13 @@
           </div>
         </div>
 
-        <!-- Button-in-Button Primary Action -->
+        <!-- Primary Transmit Action -->
         <div>
-          <button class="btn-island-primary" id="btnTransmitAll" onclick="transmitAllNow()" title="Send telemetry batch immediately (resets interval)">
+          <button class="btn-primary-batch" id="btnTransmitAll" onclick="transmitAllNow()" title="Send telemetry batch immediately (resets interval)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
             <span>Transmit Batch Now</span>
-            <div class="btn-icon-core">⚡</div>
           </button>
         </div>
       </div>
@@ -1116,108 +1210,165 @@
     <!-- Status Ribbon -->
     <div class="status-ribbon">
       <div class="ribbon-item">
-        <div class="ribbon-icon">📡</div>
+        <div class="ribbon-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+            <line x1="12" y1="20" x2="12.01" y2="20"/>
+          </svg>
+        </div>
         <div>
-          <div class="ribbon-label">Simulated Nodes</div>
-          <div class="ribbon-val">2 Active (SB-101, KV-201)</div>
+          <div class="ribbon-label">Network Protocol</div>
+          <div class="ribbon-val">HTTP REST / JSON Telemetry</div>
         </div>
       </div>
+
       <div class="ribbon-item">
-        <div class="ribbon-icon">🛰️</div>
+        <div class="ribbon-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+            <line x1="6" y1="6" x2="6.01" y2="6"/>
+            <line x1="6" y1="18" x2="6.01" y2="18"/>
+          </svg>
+        </div>
         <div>
-          <div class="ribbon-label">Physical Hardware</div>
-          <div class="ribbon-val" style="color: var(--cyan-main);">HIVE-WG-301 (Live ESP32)</div>
+          <div class="ribbon-label">Monitored Hives</div>
+          <div class="ribbon-val">2 Virtual • 1 Hardware (WG)</div>
         </div>
       </div>
+
       <div class="ribbon-item">
-        <div class="ribbon-icon">⚡</div>
+        <div class="ribbon-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div>
+          <div class="ribbon-label">Next Batch In</div>
+          <div class="ribbon-val" id="countdownTableSpan">--:--</div>
+        </div>
+      </div>
+
+      <div class="ribbon-item">
+        <div class="ribbon-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
         <div>
           <div class="ribbon-label">Ingestion Health</div>
-          <div class="ribbon-val" id="ribbonHealth" style="color: var(--green-main);">100% Operational</div>
-        </div>
-      </div>
-      <div class="ribbon-item">
-        <div class="ribbon-icon">⌨️</div>
-        <div>
-          <div class="ribbon-label">Shortcut</div>
-          <div class="ribbon-val" style="font-size: 12px;">Ctrl / ⌘ + Enter (Dispatch)</div>
+          <div class="ribbon-val" id="ribbonHealth" style="color: var(--green-main);">Healthy (201 OK)</div>
         </div>
       </div>
     </div>
 
-    <!-- Active Monitored Hives Grid -->
+    <!-- Active Monitored Hives Section -->
     <div class="section-header">
-      <div class="section-title">Active Simulated Apiaries</div>
-      <div class="section-subtitle">Real-time colony telemetry with microclimate oscillations & manual injection</div>
+      <div class="section-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L21 7.2V16.8L12 22L3 16.8V7.2L12 2Z"/>
+        </svg>
+        <span>Virtual Simulated Apiary Nodes</span>
+      </div>
+      <div class="section-desc">Hardware Node HIVE-WG-301 transmits independently via ESP32 gateway</div>
     </div>
 
+    <!-- Hives Bento Grid -->
     <div class="hives-grid" id="hivesGrid">
-      <!-- Dynamically Rendered Hive Cards -->
+      <!-- Injected via JavaScript -->
     </div>
 
-    <!-- Telemetry Audit Feed Section -->
-    <div class="section-header">
-      <div class="section-title">Live Ingestion Activity Log</div>
-      <div class="section-subtitle">Real-time audit stream of edge telemetry dispatches to HoneyChain backend</div>
-    </div>
+    <!-- Transmission Logs Panel -->
+    <div class="logs-panel">
+      <div class="logs-header">
+        <div class="logs-title-group">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"/>
+            <line x1="12" y1="19" x2="20" y2="19"/>
+          </svg>
+          <span class="logs-title">Telemetry Transmission Feed</span>
+        </div>
 
-    <div class="logs-section">
-      <div class="logs-core">
         <div class="logs-toolbar">
-          <div class="logs-filter-tabs">
-            <button class="tab-btn active" onclick="setLogFilter('all')">All (<span id="countAll">0</span>)</button>
-            <button class="tab-btn" onclick="setLogFilter('201')">✓ Ingested (<span id="count201">0</span>)</button>
-            <button class="tab-btn" onclick="setLogFilter('400')">⚠️ Anomalies (<span id="count400">0</span>)</button>
-            <button class="tab-btn" onclick="setLogFilter('200')">↷ Duplicates (<span id="count200">0</span>)</button>
+          <!-- Search input -->
+          <div class="search-box">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="logSearchInput" placeholder="Filter telemetry logs..." oninput="handleLogSearch()" />
           </div>
 
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <div class="logs-search-box">
-              <span>🔍</span>
-              <input type="text" id="logSearchInput" placeholder="Filter logs..." oninput="handleLogSearch()" />
-            </div>
-            <button class="btn-secondary" onclick="clearLogs()" title="Clear telemetry history">Clear Log</button>
+          <!-- Filter tabs -->
+          <div class="filter-tabs">
+            <button class="filter-tab active" id="tabAll" onclick="setLogFilter('all')">
+              <span>All</span>
+              <span class="filter-badge" id="countAll">0</span>
+            </button>
+            <button class="filter-tab" id="tab201" onclick="setLogFilter('201')">
+              <span>201 OK</span>
+              <span class="filter-badge" id="count201">0</span>
+            </button>
+            <button class="filter-tab" id="tab400" onclick="setLogFilter('400')">
+              <span>400 Reject</span>
+              <span class="filter-badge" id="count400">0</span>
+            </button>
+            <button class="filter-tab" id="tab200" onclick="setLogFilter('200')">
+              <span>200 Dup</span>
+              <span class="filter-badge" id="count200">0</span>
+            </button>
           </div>
-        </div>
 
-        <div class="logs-table-wrapper">
-          <table class="logs-table">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Hive ID</th>
-                <th>Device ID</th>
-                <th>Status</th>
-                <th>Temp</th>
-                <th>Humidity</th>
-                <th>Weight</th>
-                <th>Battery</th>
-                <th>Bee In</th>
-                <th>Bee Out</th>
-                <th>Backend Ingestion Response</th>
-              </tr>
-            </thead>
-            <tbody id="logsTableBody">
-              <tr>
-                <td colspan="11" style="text-align: center; color: var(--text-faint); padding: 32px;">
-                  Waiting for telemetry dispatches... (Next batch in <span id="countdownTableSpan">--:--</span>)
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- Clear button -->
+          <button class="btn-clear" onclick="clearLogs()" title="Clear telemetry log history">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+            <span>Clear</span>
+          </button>
         </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Hive ID</th>
+              <th>Device ID</th>
+              <th>Telemetry Metrics</th>
+              <th>HTTP Status</th>
+              <th>Latency</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="logsTableBody">
+            <tr>
+              <td colspan="7" class="empty-state">No telemetry transmissions logged yet. Waiting for cycle expiry or manual dispatch.</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <!-- Footer -->
     <footer>
-      <span>HoneyChain Smart Apiary IoT Simulator • Connected to <span id="footerTargetUrl">backend</span></span>
+      <div>HoneyChain Standalone IoT Edge Telemetry Simulator & Apiary Gateway</div>
+      <div>Target Ingestion: <span id="footerTargetUrl" style="font-family: var(--font-mono); color: var(--text-secondary);">Connecting...</span></div>
     </footer>
   </div>
 
   <!-- Toast Notification -->
   <div id="toast">
-    <span id="toastIcon">✓</span>
+    <span id="toastIcon">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </span>
     <span id="toastMessage">Action executed successfully</span>
   </div>
 
@@ -1234,13 +1385,15 @@
     };
 
     // Show toast feedback with animated entrance
-    function showToast(message, icon = '✓') {
+    function showToast(message, iconSvg = null) {
       const toast = document.getElementById('toast');
       document.getElementById('toastMessage').innerText = message;
-      document.getElementById('toastIcon').innerText = icon;
+      if (iconSvg) {
+        document.getElementById('toastIcon').innerHTML = iconSvg;
+      }
       toast.classList.add('show');
       clearTimeout(window.__toastTimeout);
-      window.__toastTimeout = setTimeout(() => toast.classList.remove('show'), 3200);
+      window.__toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
     // Format seconds to MM:SS
@@ -1263,18 +1416,17 @@
       const elapsed = Math.max(0, totalSec - sec);
       const pct = Math.min(100, Math.max(0, Math.round((elapsed / totalSec) * 100)));
 
-      // Update Circular SVG Gauge
-      // Circumference for r=42 is 2 * PI * 42 ≈ 263.89
+      // Update Circular SVG Gauge: Circumference for r=38 is 2 * PI * 38 ≈ 238.76
       const circle = document.getElementById('gaugeCircle');
       if (circle) {
-        const offset = 264 - (pct / 100) * 264;
+        const offset = 238.76 - (pct / 100) * 238.76;
         circle.style.strokeDashoffset = offset;
       }
 
       const badge = document.getElementById('cadenceBadge');
       if (badge) {
         const cadenceDesc = totalSec >= 60 ? `${(totalSec / 60).toFixed(0)}m Cadence` : `${totalSec}s Cadence`;
-        badge.innerText = `⏱️ ${cadenceDesc} (.env)`;
+        badge.innerText = `${cadenceDesc} (.env)`;
       }
 
       document.getElementById('progressBar').style.width = `${pct}%`;
@@ -1330,15 +1482,14 @@
       }
     }
 
-    // Calculate sensor guide fill percentage and color
+    // Sensor guide calculations
     function getTempGuide(temp) {
       if (temp === null || temp === 'NaN') return { pct: 0, color: 'transparent' };
       const val = parseFloat(temp);
       if (isNaN(val)) return { pct: 0, color: 'transparent' };
-      // Optimal range is 33.0 to 36.0 (scaled across 30 to 40)
       const pct = Math.max(5, Math.min(100, Math.round(((val - 30) / 10) * 100)));
       const isOptimal = val >= 33.0 && val <= 36.0;
-      const color = isOptimal ? 'var(--green-main)' : (val > 36 ? 'var(--red-main)' : 'var(--cyan-main)');
+      const color = isOptimal ? 'var(--green-main)' : (val > 36 ? 'var(--rose-main)' : 'var(--blue-main)');
       return { pct, color };
     }
 
@@ -1348,7 +1499,7 @@
       if (isNaN(val)) return { pct: 0, color: 'transparent' };
       const pct = Math.max(5, Math.min(100, Math.round(val)));
       const isOptimal = val >= 50 && val <= 70;
-      return { pct, color: isOptimal ? 'var(--cyan-main)' : 'var(--amber-main)' };
+      return { pct, color: isOptimal ? 'var(--blue-main)' : 'var(--amber-main)' };
     }
 
     function getBatteryGuide(bat) {
@@ -1356,7 +1507,7 @@
       const val = parseFloat(bat);
       if (isNaN(val)) return { pct: 0, color: 'transparent' };
       const pct = Math.max(5, Math.min(100, Math.round(val)));
-      const color = val > 50 ? 'var(--green-main)' : (val > 20 ? 'var(--amber-main)' : 'var(--red-main)');
+      const color = val > 50 ? 'var(--green-main)' : (val > 20 ? 'var(--amber-main)' : 'var(--rose-main)');
       return { pct, color };
     }
 
@@ -1364,16 +1515,14 @@
       if (weight === null || weight === 'NaN') return { pct: 0, color: 'transparent' };
       const val = parseFloat(weight);
       if (isNaN(val)) return { pct: 0, color: 'transparent' };
-      // Scale 20kg to 50kg
       const pct = Math.max(5, Math.min(100, Math.round(((val - 20) / 30) * 100)));
       return { pct, color: 'var(--amber-main)' };
     }
 
-    // Render Hive Cards with double bezel architecture
+    // Render Hive Cards
     function renderHiveCards(hives) {
       const container = document.getElementById('hivesGrid');
       
-      // Preserve currently focused element ID to prevent input flicker during re-renders
       const activeElement = document.activeElement;
       const activeId = activeElement ? activeElement.id : null;
       const activeSelectionStart = activeElement ? activeElement.selectionStart : null;
@@ -1389,166 +1538,185 @@
         const weightG = getWeightGuide(p.weightKg);
 
         const card = document.createElement('div');
-        card.className = `hive-card-shell ${hive.isManipulated ? 'customized' : ''}`;
+        card.className = `hive-card ${hive.isManipulated ? 'customized' : ''}`;
         card.id = `card-${hive.hiveId}`;
 
         card.innerHTML = `
-          <div class="hive-card-core">
-            <div class="hive-header">
-              <div class="hive-id-badge">
-                <div class="hive-icon-wrap">🐝</div>
-                <div class="hive-title-group">
-                  <h3>${hive.hiveId}</h3>
-                  <div class="hive-meta">${hive.deviceId} • ${hive.region || 'Smart Apiary Node'}</div>
+          <div class="hive-card-header">
+            <div class="hive-id-badge">
+              <div class="hive-icon-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2L21 7.2V16.8L12 22L3 16.8V7.2L12 2Z"/>
+                </svg>
+              </div>
+              <div class="hive-title-group">
+                <h3>${hive.hiveId}</h3>
+                <div class="hive-meta">${hive.deviceId} • ${hive.region || 'Smart Apiary Node'}</div>
+              </div>
+            </div>
+            <span class="status-badge ${hive.isManipulated ? 'badge-custom' : 'badge-auto'}" id="status-badge-${hive.hiveId}">
+              <span class="status-dot"></span>
+              ${hive.isManipulated ? 'Manual Override' : 'Natural Physics'}
+            </span>
+          </div>
+
+          <div class="fields-grid">
+            <!-- Brood Temp -->
+            <div class="field-card">
+              <div class="field-header">
+                <span>Brood Temp</span>
+                <span class="field-unit">°C (33–36)</span>
+              </div>
+              <div class="field-input-row">
+                <input type="text" class="field-input" id="input-temp-${hive.hiveId}" value="${formatValue(p.temperature)}" placeholder="e.g. 35.1, null, NaN">
+                <div class="btn-group-special">
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-temp-${hive.hiveId}', 'null')" title="Set Brood Temp to explicit null">null</button>
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-temp-${hive.hiveId}', 'NaN')" title="Set Brood Temp to explicit NaN">NaN</button>
                 </div>
               </div>
-              <span class="status-badge ${hive.isManipulated ? 'badge-custom' : 'badge-auto'}" id="status-badge-${hive.hiveId}">
-                ${hive.isManipulated ? '⚡ Overridden' : '✓ Auto Physics'}
-              </span>
+              <div class="sensor-guide">
+                <div class="sensor-guide-fill" style="width: ${tempG.pct}%; background: ${tempG.color};"></div>
+              </div>
             </div>
 
-            <div class="fields-grid">
-              <!-- Brood Nest Temp -->
-              <div class="field-card">
-                <div class="field-header">
-                  <span>Brood Temp</span>
-                  <span class="field-unit">°C (33-36)</span>
-                </div>
-                <div class="field-input-row">
-                  <input type="text" class="field-input" id="input-temp-${hive.hiveId}" value="${formatValue(p.temperature)}" placeholder="e.g. 34.8, null, NaN">
-                  <div class="btn-group-special">
-                    <button type="button" class="btn-special" onclick="setSpecialValue('input-temp-${hive.hiveId}', 'null')" title="Set Brood Temp to explicit null">null</button>
-                    <button type="button" class="btn-special" onclick="setSpecialValue('input-temp-${hive.hiveId}', 'NaN')" title="Set Brood Temp to explicit NaN">NaN</button>
-                  </div>
-                </div>
-                <div class="sensor-guide">
-                  <div class="sensor-guide-fill" style="width: ${tempG.pct}%; background: ${tempG.color};"></div>
+            <!-- Humidity -->
+            <div class="field-card">
+              <div class="field-header">
+                <span>Humidity</span>
+                <span class="field-unit">% (50–70)</span>
+              </div>
+              <div class="field-input-row">
+                <input type="text" class="field-input" id="input-hum-${hive.hiveId}" value="${formatValue(p.humidity)}" placeholder="e.g. 62.5, null, NaN">
+                <div class="btn-group-special">
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-hum-${hive.hiveId}', 'null')" title="Set Humidity to explicit null">null</button>
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-hum-${hive.hiveId}', 'NaN')" title="Set Humidity to explicit NaN">NaN</button>
                 </div>
               </div>
+              <div class="sensor-guide">
+                <div class="sensor-guide-fill" style="width: ${humG.pct}%; background: ${humG.color};"></div>
+              </div>
+            </div>
 
-              <!-- Humidity -->
-              <div class="field-card">
-                <div class="field-header">
-                  <span>Humidity</span>
-                  <span class="field-unit">% (50-70)</span>
-                </div>
-                <div class="field-input-row">
-                  <input type="text" class="field-input" id="input-hum-${hive.hiveId}" value="${formatValue(p.humidity)}" placeholder="e.g. 58.2, null, NaN">
-                  <div class="btn-group-special">
-                    <button type="button" class="btn-special" onclick="setSpecialValue('input-hum-${hive.hiveId}', 'null')" title="Set Humidity to explicit null">null</button>
-                    <button type="button" class="btn-special" onclick="setSpecialValue('input-hum-${hive.hiveId}', 'NaN')" title="Set Humidity to explicit NaN">NaN</button>
-                  </div>
-                </div>
-                <div class="sensor-guide">
-                  <div class="sensor-guide-fill" style="width: ${humG.pct}%; background: ${humG.color};"></div>
+            <!-- Hive Weight -->
+            <div class="field-card">
+              <div class="field-header">
+                <span>Hive Weight</span>
+                <span class="field-unit">kg (Load Cell)</span>
+              </div>
+              <div class="field-input-row">
+                <input type="text" class="field-input" id="input-weight-${hive.hiveId}" value="${formatValue(p.weightKg)}" placeholder="e.g. 31.5, null, NaN">
+                <div class="btn-group-special">
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-weight-${hive.hiveId}', 'null')" title="Set Weight to explicit null">null</button>
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-weight-${hive.hiveId}', 'NaN')" title="Set Weight to explicit NaN">NaN</button>
                 </div>
               </div>
+              <div class="sensor-guide">
+                <div class="sensor-guide-fill" style="width: ${weightG.pct}%; background: ${weightG.color};"></div>
+              </div>
+            </div>
 
-              <!-- Hive Weight -->
-              <div class="field-card">
-                <div class="field-header">
-                  <span>Hive Weight</span>
-                  <span class="field-unit">kg (Load Cell)</span>
-                </div>
-                <div class="field-input-row">
-                  <input type="text" class="field-input" id="input-weight-${hive.hiveId}" value="${formatValue(p.weightKg)}" placeholder="e.g. 31.5, null, NaN">
-                  <div class="btn-group-special">
-                    <button type="button" class="btn-special" onclick="setSpecialValue('input-weight-${hive.hiveId}', 'null')" title="Set Weight to explicit null">null</button>
-                    <button type="button" class="btn-special" onclick="setSpecialValue('input-weight-${hive.hiveId}', 'NaN')" title="Set Weight to explicit NaN">NaN</button>
-                  </div>
-                </div>
-                <div class="sensor-guide">
-                  <div class="sensor-guide-fill" style="width: ${weightG.pct}%; background: ${weightG.color};"></div>
+            <!-- Battery Level -->
+            <div class="field-card">
+              <div class="field-header">
+                <span>Battery Level</span>
+                <span class="field-unit">% (0–100)</span>
+              </div>
+              <div class="field-input-row">
+                <input type="text" class="field-input" id="input-bat-${hive.hiveId}" value="${formatValue(p.batteryLevelPct)}" placeholder="e.g. 95, null, NaN">
+                <div class="btn-group-special">
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-bat-${hive.hiveId}', 'null')" title="Set Battery to explicit null">null</button>
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-bat-${hive.hiveId}', 'NaN')" title="Set Battery to explicit NaN">NaN</button>
                 </div>
               </div>
-
-              <!-- Battery Level -->
-              <div class="field-card">
-                <div class="field-header">
-                  <span>Battery Level</span>
-                  <span class="field-unit">% (0-100)</span>
-                </div>
-                <div class="field-input-row">
-                  <input type="text" class="field-input" id="input-bat-${hive.hiveId}" value="${formatValue(p.batteryLevelPct)}" placeholder="e.g. 95, null, NaN">
-                  <div class="btn-group-special">
-                    <button type="button" class="btn-special" onclick="setSpecialValue('input-bat-${hive.hiveId}', 'null')" title="Set Battery to explicit null">null</button>
-                    <button type="button" class="btn-special" onclick="setSpecialValue('input-bat-${hive.hiveId}', 'NaN')" title="Set Battery to explicit NaN">NaN</button>
-                  </div>
-                </div>
-                <div class="sensor-guide">
-                  <div class="sensor-guide-fill" style="width: ${batG.pct}%; background: ${batG.color};"></div>
-                </div>
+              <div class="sensor-guide">
+                <div class="sensor-guide-fill" style="width: ${batG.pct}%; background: ${batG.color};"></div>
               </div>
+            </div>
 
-              <!-- Bee In Flow -->
-              <div class="field-card">
-                <div class="field-header">
-                  <span>Bee In Count</span>
-                  <span class="field-unit">Arrivals</span>
-                </div>
-                <div class="field-input-row">
-                  <input type="text" class="field-input" id="input-in-${hive.hiveId}" value="${formatValue(p.beeInCount)}" placeholder="e.g. 120, null, NaN">
-                  <div class="btn-group-special">
-                    <button type="button" class="btn-special" onclick="setSpecialValue('input-in-${hive.hiveId}', 'null')" title="Set Bee In to explicit null">null</button>
-                    <button type="button" class="btn-special" onclick="setSpecialValue('input-in-${hive.hiveId}', 'NaN')" title="Set Bee In to explicit NaN">NaN</button>
-                  </div>
-                </div>
+            <!-- Bee In Flow -->
+            <div class="field-card">
+              <div class="field-header">
+                <span>Bee In Count</span>
+                <span class="field-unit">Arrivals</span>
               </div>
-
-              <!-- Bee Out Flow -->
-              <div class="field-card">
-                <div class="field-header">
-                  <span>Bee Out Count</span>
-                  <span class="field-unit">Departures</span>
-                </div>
-                <div class="field-input-row">
-                  <input type="text" class="field-input" id="input-out-${hive.hiveId}" value="${formatValue(p.beeOutCount)}" placeholder="e.g. 115, null, NaN">
-                  <div class="btn-group-special">
-                    <button type="button" class="btn-special" onclick="setSpecialValue('input-out-${hive.hiveId}', 'null')" title="Set Bee Out to explicit null">null</button>
-                    <button type="button" class="btn-special" onclick="setSpecialValue('input-out-${hive.hiveId}', 'NaN')" title="Set Bee Out to explicit NaN">NaN</button>
-                  </div>
+              <div class="field-input-row">
+                <input type="text" class="field-input" id="input-in-${hive.hiveId}" value="${formatValue(p.beeInCount)}" placeholder="e.g. 120, null, NaN">
+                <div class="btn-group-special">
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-in-${hive.hiveId}', 'null')" title="Set Bee In to explicit null">null</button>
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-in-${hive.hiveId}', 'NaN')" title="Set Bee In to explicit NaN">NaN</button>
                 </div>
               </div>
             </div>
 
-            <!-- Simulation & Anomaly Presets -->
-            <div class="presets-container">
-              <div class="presets-group-title">🌿 Colony Biology Presets:</div>
-              <div class="presets-buttons">
-                <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'swarm')">🐝 Swarm Alert</button>
-                <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'overheating')">🔥 Brood Fever</button>
-                <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'chilling')">❄️ Chill Alert</button>
-                <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'nectar_surge')">🍯 Nectar Surge</button>
-                <button class="preset-chip" onclick="applyPreset('${hive.hiveId}', 'low_battery')">🪫 Low Battery</button>
+            <!-- Bee Out Flow -->
+            <div class="field-card">
+              <div class="field-header">
+                <span>Bee Out Count</span>
+                <span class="field-unit">Departures</span>
               </div>
+              <div class="field-input-row">
+                <input type="text" class="field-input" id="input-out-${hive.hiveId}" value="${formatValue(p.beeOutCount)}" placeholder="e.g. 115, null, NaN">
+                <div class="btn-group-special">
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-out-${hive.hiveId}', 'null')" title="Set Bee Out to explicit null">null</button>
+                  <button type="button" class="btn-special" onclick="setSpecialValue('input-out-${hive.hiveId}', 'NaN')" title="Set Bee Out to explicit NaN">NaN</button>
+                </div>
+              </div>
+            </div>
+          </div>
 
-              <div class="presets-group-title" style="margin-top: 10px;">⚡ Chaos & Malformed Anomaly Injection:</div>
-              <div class="presets-buttons">
-                <button class="preset-chip chip-danger" onclick="applyPreset('${hive.hiveId}', 'null_temp')" title="Sets Brood Temp to explicit null">⚠️ Null Temp</button>
-                <button class="preset-chip chip-danger" onclick="applyPreset('${hive.hiveId}', 'nan_temp')" title="Sets Brood Temp to explicit NaN">⚠️ NaN Temp</button>
-                <button class="preset-chip chip-danger" onclick="applyPreset('${hive.hiveId}', 'corrupt_nulls')" title="Sets all sensors to explicit null">💥 All Null</button>
-                <button class="preset-chip chip-danger" onclick="applyPreset('${hive.hiveId}', 'corrupt_nans')" title="Sets all sensors to explicit NaN">💥 All NaN</button>
+          <!-- Simulation & Anomaly Presets -->
+          <div class="presets-section">
+            <div class="presets-group">
+              <span class="presets-label">Biological Scenarios</span>
+              <div class="presets-chips">
+                <button class="preset-pill" onclick="applyPreset('${hive.hiveId}', 'swarm')">Swarm Alert</button>
+                <button class="preset-pill" onclick="applyPreset('${hive.hiveId}', 'overheating')">Brood Fever</button>
+                <button class="preset-pill" onclick="applyPreset('${hive.hiveId}', 'chilling')">Chill Alert</button>
+                <button class="preset-pill" onclick="applyPreset('${hive.hiveId}', 'nectar_surge')">Nectar Surge</button>
+                <button class="preset-pill" onclick="applyPreset('${hive.hiveId}', 'low_battery')">Low Battery</button>
               </div>
             </div>
 
-            <!-- Footer Actions -->
-            <div class="card-actions">
-              <div class="last-tx-info" title="${hive.lastResult ? (hive.lastResult.message || '') : 'Pending dispatch'}">
-                ${hive.lastResult 
-                  ? `${hive.lastResult.success ? '✓' : '✗'} Last: ${hive.lastResult.status || 'NET'} (${hive.lastResult.message || ''})`
-                  : 'Pending first dispatch'}
+            <div class="presets-group" style="margin-top: 10px;">
+              <span class="presets-label presets-label-danger">Anomaly & Fuzz Testing</span>
+              <div class="presets-chips">
+                <button class="preset-pill pill-danger" onclick="applyPreset('${hive.hiveId}', 'null_temp')" title="Set Brood Temp to explicit null">Null Temp</button>
+                <button class="preset-pill pill-danger" onclick="applyPreset('${hive.hiveId}', 'nan_temp')" title="Set Brood Temp to explicit NaN">NaN Temp</button>
+                <button class="preset-pill pill-danger" onclick="applyPreset('${hive.hiveId}', 'corrupt_nulls')" title="Set all sensors to explicit null">All Null</button>
+                <button class="preset-pill pill-danger" onclick="applyPreset('${hive.hiveId}', 'corrupt_nans')" title="Set all sensors to explicit NaN">All NaN</button>
               </div>
-              <div class="actions-button-group">
-                <button class="btn-secondary" onclick="resetHive('${hive.hiveId}')" title="Revert to natural biology simulation">
-                  🔄 Revert
-                </button>
-                <button class="btn-secondary" onclick="saveHiveOverrides('${hive.hiveId}')" title="Save pending telemetry overrides">
-                  💾 Save
-                </button>
-                <button class="btn-primary-sm" onclick="transmitHiveNow('${hive.hiveId}')" title="Transmit this hive immediately">
-                  🚀 Send Now
-                </button>
-              </div>
+            </div>
+          </div>
+
+          <!-- Footer Actions -->
+          <div class="card-actions">
+            <div class="last-tx-info" title="${hive.lastResult ? (hive.lastResult.message || '') : 'Pending dispatch'}">
+              ${hive.lastResult 
+                ? `Last: ${hive.lastResult.status || 'NET'} (${hive.lastResult.message || ''})`
+                : 'Pending first dispatch'}
+            </div>
+            <div class="actions-button-group">
+              <button class="btn-ghost" onclick="resetHive('${hive.hiveId}')" title="Revert to natural biology simulation">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                  <path d="M3 3v5h5"/>
+                </svg>
+                <span>Revert</span>
+              </button>
+              <button class="btn-outline" onclick="saveHiveOverrides('${hive.hiveId}')" title="Save pending telemetry overrides">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                  <polyline points="17 21 17 13 7 13 7 21"/>
+                  <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                <span>Save</span>
+              </button>
+              <button class="btn-action-primary" onclick="transmitHiveNow('${hive.hiveId}')" title="Transmit this hive immediately">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+                <span>Send Now</span>
+              </button>
             </div>
           </div>
         `;
@@ -1556,53 +1724,51 @@
         container.appendChild(card);
       });
 
-      // Restore focus if user was typing in an input
+      // Restore active focus if the user was currently typing
       if (activeId) {
         const el = document.getElementById(activeId);
         if (el) {
           el.focus();
           if (activeSelectionStart !== null && activeSelectionEnd !== null) {
-            el.setSelectionRange(activeSelectionStart, activeSelectionEnd);
+            try {
+              el.setSelectionRange(activeSelectionStart, activeSelectionEnd);
+            } catch (e) {}
           }
         }
       }
     }
 
-    // Helper to format values for text inputs
-    function formatValue(val) {
-      if (val === null) return 'null';
-      if (val === 'NaN' || (typeof val === 'number' && isNaN(val))) return 'NaN';
-      if (val === undefined) return '';
-      return String(val);
+    // Format value helper
+    function formatValue(v) {
+      if (v === null) return "null";
+      if (v === "NaN" || (typeof v === "number" && isNaN(v))) return "NaN";
+      return v !== undefined ? v : "";
     }
 
-    // Quick set inline input to null or NaN
-    function setSpecialValue(inputId, val) {
+    // Set special value (null or NaN) into an input field
+    function setSpecialValue(inputId, value) {
       const el = document.getElementById(inputId);
       if (el) {
-        el.value = val;
+        el.value = value;
         el.focus();
-        el.style.color = '#f87171';
-        setTimeout(() => {
-          if (el) el.style.color = '';
-        }, 1200);
+        showToast(`Set ${inputId.split('-')[1]} to ${value}`);
       }
     }
 
-    // Helper to parse sensor input while strictly preserving null and NaN without coercing to 0
-    function parseFieldValue(raw) {
-      if (raw === undefined || raw === null) return undefined;
-      const str = String(raw).trim();
-      if (str === '') return undefined;
-      if (str.toLowerCase() === 'null') return null;
-      if (str.toLowerCase() === 'nan') return 'NaN';
-      const num = parseFloat(str);
-      return isNaN(num) ? 'NaN' : num;
+    // Parse field value supporting null and NaN strings
+    function parseFieldValue(val) {
+      if (val === undefined || val === null) return null;
+      const s = String(val).trim();
+      if (s.toLowerCase() === "null") return null;
+      if (s.toLowerCase() === "nan") return "NaN";
+      if (s === "") return null;
+      const num = Number(s);
+      return isNaN(num) ? "NaN" : num;
     }
 
-    // Save edited values for a hive
+    // Save Hive Overrides via REST
     async function saveHiveOverrides(hiveId) {
-      const overrides = {
+      const payload = {
         temperature: parseFieldValue(document.getElementById(`input-temp-${hiveId}`)?.value),
         humidity: parseFieldValue(document.getElementById(`input-hum-${hiveId}`)?.value),
         weightKg: parseFieldValue(document.getElementById(`input-weight-${hiveId}`)?.value),
@@ -1615,101 +1781,251 @@
         const res = await fetch(`/api/hives/${hiveId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(overrides),
+          body: JSON.stringify(payload)
         });
-
         if (res.ok) {
-          showToast(`Telemetry overrides saved for ${hiveId}! Will send on next cycle or immediate send.`);
           const card = document.getElementById(`card-${hiveId}`);
           if (card) card.classList.add('customized');
           const badge = document.getElementById(`status-badge-${hiveId}`);
           if (badge) {
             badge.className = 'status-badge badge-custom';
-            badge.innerText = '⚡ Overridden';
+            badge.innerHTML = '<span class="status-dot"></span>Manual Override';
           }
-        } else {
-          showToast('Failed to update telemetry overrides', '✗');
+          showToast(`Saved telemetry overrides for ${hiveId}`);
+          await loadAllHives();
         }
       } catch (err) {
-        showToast('Network error saving overrides', '✗');
+        showToast(`Failed to save overrides for ${hiveId}`);
       }
     }
 
-    // Apply quick scenario preset
+    // Apply Scenario Preset
     async function applyPreset(hiveId, preset) {
       try {
         const res = await fetch(`/api/hives/${hiveId}/preset`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ preset }),
+          body: JSON.stringify({ preset })
         });
-
         if (res.ok) {
-          showToast(`Preset "${preset}" applied to ${hiveId}`);
+          showToast(`Applied preset "${preset}" to ${hiveId}`);
           await loadAllHives();
         }
       } catch (err) {
-        showToast('Failed to apply preset', '✗');
+        showToast(`Failed to apply preset to ${hiveId}`);
       }
     }
 
-    // Reset hive to natural physics
+    // Revert Hive Overrides back to natural physics
     async function resetHive(hiveId) {
       try {
         const res = await fetch(`/api/hives/${hiveId}/reset`, { method: 'POST' });
         if (res.ok) {
-          showToast(`${hiveId} reset to natural physics`);
+          showToast(`Reverted ${hiveId} to natural biology physics`);
           await loadAllHives();
         }
       } catch (err) {
-        showToast('Failed to reset hive', '✗');
+        showToast(`Failed to revert ${hiveId}`);
       }
     }
 
-    // Transmit single hive now
+    // Transmit single hive immediately
     async function transmitHiveNow(hiveId) {
-      await saveHiveOverrides(hiveId);
-
       try {
-        showToast(`Transmitting ${hiveId} now...`, '🚀');
+        showToast(`Transmitting telemetry for ${hiveId}...`);
         const res = await fetch(`/api/hives/${hiveId}/transmit`, { method: 'POST' });
         const data = await res.json();
-        if (data.success) {
-          showToast(`Transmitted ${hiveId} (HTTP ${data.status})`);
+        if (res.ok) {
+          showToast(`Transmitted ${hiveId} -> HTTP ${data.status}`);
         } else {
-          showToast(`Transmission response: ${data.message || data.error}`, '✗');
+          showToast(`Failed ${hiveId} -> HTTP ${data.status}`);
         }
         await loadAllHives();
         await loadLogs();
       } catch (err) {
-        showToast(`Error sending ${hiveId}`, '✗');
+        showToast(`Network error transmitting ${hiveId}`);
       }
     }
 
-    // Transmit all hives immediately
+    // Transmit all hives batch immediately
     async function transmitAllNow() {
       const btn = document.getElementById('btnTransmitAll');
-      if (btn) {
-        btn.disabled = true;
-        btn.style.opacity = '0.6';
-      }
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 2a10 10 0 0 1 10 10"/>
+        </svg>
+        <span>Transmitting...</span>
+      `;
 
       try {
-        showToast('Transmitting batch of simulated hives to backend...', '🚀');
         const res = await fetch('/api/transmit-now', { method: 'POST' });
         const summary = await res.json();
-        showToast(`Batch complete: ${summary.successful} OK, ${summary.duplicates} Dup, ${summary.failed} Failed`);
+        showToast(`Batch completed: ${summary.successful}/${summary.total} successful`);
         await fetchStatus();
         await loadAllHives();
         await loadLogs();
       } catch (err) {
-        showToast('Error transmitting batch', '✗');
+        showToast(`Transmission error`);
       } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.style.opacity = '1';
+        btn.disabled = false;
+        btn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          <span>Transmit Batch Now</span>
+        `;
+      }
+    }
+
+    // Filter Logs List
+    function filterLogsList(logs) {
+      return logs.filter(log => {
+        if (activeLogFilter === '201' && log.status !== 201) return false;
+        if (activeLogFilter === '400' && log.status !== 400) return false;
+        if (activeLogFilter === '200' && log.status !== 200) return false;
+
+        if (logSearchTerm) {
+          const hay = `${log.hiveId} ${log.deviceId} ${log.status} ${log.message || ''} ${JSON.stringify(log.payload || '')}`.toLowerCase();
+          if (!hay.includes(logSearchTerm)) return false;
+        }
+        return true;
+      });
+    }
+
+    // Handle Log Search Input
+    function handleLogSearch() {
+      logSearchTerm = document.getElementById('logSearchInput').value.trim().toLowerCase();
+      renderLogs(filterLogsList(currentLogs));
+    }
+
+    // Set Active Log Filter Tab
+    function setLogFilter(filter) {
+      activeLogFilter = filter;
+      ['tabAll', 'tab201', 'tab400', 'tab200'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.remove('active');
+      });
+      const activeBtn = document.getElementById(`tab${filter === 'all' ? 'All' : filter}`);
+      if (activeBtn) activeBtn.classList.add('active');
+      renderLogs(filterLogsList(currentLogs));
+    }
+
+    // Update Log Counts in Tabs & Ribbon Health
+    function updateLogCounts() {
+      const allC = currentLogs.length;
+      const c201 = currentLogs.filter(l => l.status === 201).length;
+      const c400 = currentLogs.filter(l => l.status === 400).length;
+      const c200 = currentLogs.filter(l => l.status === 200).length;
+
+      document.getElementById('countAll').innerText = allC;
+      document.getElementById('count201').innerText = c201;
+      document.getElementById('count400').innerText = c400;
+      document.getElementById('count200').innerText = c200;
+
+      const ribbonHealth = document.getElementById('ribbonHealth');
+      if (ribbonHealth && currentLogs.length > 0) {
+        const latest = currentLogs[0];
+        if (latest.status === 201) {
+          ribbonHealth.innerText = "Healthy (201 OK)";
+          ribbonHealth.style.color = "var(--green-main)";
+        } else if (latest.status === 400) {
+          ribbonHealth.innerText = "Validation Reject (400)";
+          ribbonHealth.style.color = "var(--rose-main)";
+        } else if (latest.status === 200) {
+          ribbonHealth.innerText = "Idempotent Dup (200)";
+          ribbonHealth.style.color = "var(--blue-main)";
+        } else {
+          ribbonHealth.innerText = `HTTP ${latest.status || 'NET'}`;
+          ribbonHealth.style.color = "var(--amber-main)";
         }
       }
+    }
+
+    // Render Logs Table
+    function renderLogs(logs) {
+      const tbody = document.getElementById('logsTableBody');
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No telemetry transmissions match current filter.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      logs.forEach((log, index) => {
+        let statusBadge = `<span class="badge-status badge-net">NET ERR</span>`;
+        if (log.status === 201) {
+          statusBadge = `<span class="badge-status badge-201">201 OK</span>`;
+        } else if (log.status === 400) {
+          statusBadge = `<span class="badge-status badge-400">400 REJECT</span>`;
+        } else if (log.status === 200) {
+          statusBadge = `<span class="badge-status badge-200">200 DUP</span>`;
+        }
+
+        const dateStr = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '--:--:--';
+        const p = log.payload || {};
+        const pSummary = `${p.temperature ?? 'null'}°C | ${p.humidity ?? 'null'}% | ${p.weightKg ?? 'null'}kg | bat:${p.batteryLevelPct ?? 'null'}%`;
+
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.title = 'Click to toggle payload preview';
+        tr.onclick = () => togglePayloadRow(`payload-row-${index}`);
+
+        tr.innerHTML = `
+          <td>${dateStr}</td>
+          <td><strong style="color: var(--text-primary);">${log.hiveId}</strong></td>
+          <td>${log.deviceId}</td>
+          <td style="color: var(--text-muted); font-size: 11.5px;">${pSummary}</td>
+          <td>${statusBadge}</td>
+          <td>${log.durationMs ? `${log.durationMs}ms` : '--'}</td>
+          <td>
+            <button class="btn-ghost" style="padding: 2px 8px; font-size: 11px;" onclick="event.stopPropagation(); togglePayloadRow('payload-row-${index}')">
+              Payload
+            </button>
+          </td>
+        `;
+
+        const trDetail = document.createElement('tr');
+        trDetail.id = `payload-row-${index}`;
+        trDetail.style.display = 'none';
+        trDetail.className = 'row-expanded';
+        trDetail.innerHTML = `
+          <td colspan="7" style="padding: 12px 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.05em;">Transmitted JSON Payload:</span>
+              <button class="btn-ghost" style="padding: 2px 8px; font-size: 11px;" onclick="copyJsonPayload(${index})">Copy JSON</button>
+            </div>
+            <pre class="payload-pre">${escapeHtml(JSON.stringify(log.payload, null, 2))}</pre>
+            ${log.responseBody ? `
+              <div style="margin-top: 10px; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.05em; margin-bottom: 6px;">Backend Response:</div>
+              <pre class="payload-pre">${escapeHtml(typeof log.responseBody === 'string' ? log.responseBody : JSON.stringify(log.responseBody, null, 2))}</pre>
+            ` : ''}
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+        tbody.appendChild(trDetail);
+      });
+    }
+
+    function togglePayloadRow(id) {
+      const row = document.getElementById(id);
+      if (row) {
+        row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+      }
+    }
+
+    function copyJsonPayload(index) {
+      const log = currentLogs[index];
+      if (log && log.payload) {
+        navigator.clipboard.writeText(JSON.stringify(log.payload, null, 2));
+        showToast('Payload copied to clipboard');
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
     // Clear logs
@@ -1721,156 +2037,41 @@
         renderLogs([]);
         showToast('Telemetry logs cleared');
       } catch (err) {
-        showToast('Failed to clear logs', '✗');
+        showToast('Failed to clear logs');
       }
     }
 
-    // Log Filter Tab handling
-    function setLogFilter(filter) {
-      activeLogFilter = filter;
-      document.querySelectorAll('.logs-filter-tabs .tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      event.target.classList.add('active');
-      renderLogs(filterLogsList(currentLogs));
-    }
-
-    function handleLogSearch() {
-      logSearchTerm = document.getElementById('logSearchInput').value.trim().toLowerCase();
-      renderLogs(filterLogsList(currentLogs));
-    }
-
-    function filterLogsList(logs) {
-      return logs.filter(l => {
-        // Tab filter
-        let passTab = true;
-        if (activeLogFilter === '201') passTab = l.status === 201;
-        else if (activeLogFilter === '400') passTab = (l.status >= 400 || l.success === false);
-        else if (activeLogFilter === '200') passTab = l.duplicate === true || l.status === 200;
-
-        if (!passTab) return false;
-
-        // Search filter
-        if (!logSearchTerm) return true;
-        const haystack = `${l.hiveId} ${l.deviceId} ${l.message || ''} ${l.status || ''} ${l.temperature} ${l.humidity}`.toLowerCase();
-        return haystack.includes(logSearchTerm);
-      });
-    }
-
-    function updateLogCounts() {
-      const allC = currentLogs.length;
-      const c201 = currentLogs.filter(l => l.status === 201).length;
-      const c400 = currentLogs.filter(l => l.status >= 400 || l.success === false).length;
-      const c200 = currentLogs.filter(l => l.duplicate === true || l.status === 200).length;
-
-      document.getElementById('countAll').innerText = allC;
-      document.getElementById('count201').innerText = c201;
-      document.getElementById('count400').innerText = c400;
-      document.getElementById('count200').innerText = c200;
-
-      // Update Ribbon health
-      const ribbonHealth = document.getElementById('ribbonHealth');
-      if (ribbonHealth) {
-        if (allC > 0) {
-          const rate = Math.round((c201 / allC) * 100);
-          ribbonHealth.innerText = `${rate}% Operational`;
-          ribbonHealth.style.color = rate > 80 ? 'var(--green-main)' : (rate > 50 ? 'var(--amber-main)' : 'var(--red-main)');
-        }
+    // Local 1-second interval for smooth countdown tick
+    setInterval(() => {
+      if (simulatorStatus.secondsRemaining > 0) {
+        simulatorStatus.secondsRemaining--;
+        updateCountdownUI();
       }
-    }
+    }, 1000);
 
-    function formatLogVal(val, unit = '') {
-      if (val === null) return '<span class="tag-danger-val">null</span>';
-      if (val === 'NaN' || (typeof val === 'number' && isNaN(val))) return '<span class="tag-danger-val">NaN</span>';
-      return `${val}${unit}`;
-    }
+    // Initial load
+    fetchStatus();
+    loadAllHives();
+    loadLogs();
 
-    // Render Logs Table
-    function renderLogs(logs) {
-      const tbody = document.getElementById('logsTableBody');
-      if (!logs || logs.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="11" style="text-align: center; color: var(--text-faint); padding: 32px;">
-              ${logSearchTerm || activeLogFilter !== 'all' ? 'No matching logs found.' : 'No transmission logs recorded yet.'}
-            </td>
-          </tr>
-        `;
-        return;
-      }
+    // Periodic poll for sync
+    setInterval(fetchStatus, 4000);
+    setInterval(loadLogs, 4000);
 
-      tbody.innerHTML = logs.map(l => `
-        <tr>
-          <td style="color: var(--text-muted);">${l.timestamp}</td>
-          <td><strong>${l.hiveId}</strong></td>
-          <td style="color: var(--text-faint);">${l.deviceId}</td>
-          <td>
-            <span class="pill-status ${l.status === 201 ? 'pill-201' : (l.duplicate ? 'pill-200' : 'pill-err')}">
-              ${l.status ? `HTTP ${l.status}` : 'ERR'}
-            </span>
-          </td>
-          <td>${formatLogVal(l.temperature, '°C')}</td>
-          <td>${formatLogVal(l.humidity, '%')}</td>
-          <td>${formatLogVal(l.weightKg, ' kg')}</td>
-          <td>${formatLogVal(l.batteryLevelPct, '%')}</td>
-          <td>${formatLogVal(l.beeInCount)}</td>
-          <td>${formatLogVal(l.beeOutCount)}</td>
-          <td style="color: ${l.success ? 'var(--text-muted)' : '#fca5a5'}; max-width: 260px; overflow: hidden; text-overflow: ellipsis;" title="${l.message || ''}">
-            ${l.message || ''}
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    // Server-Sent Events (SSE) for Real-Time Synchronization
-    function connectEventStream() {
+    // Server-Sent Events (SSE) live updates
+    try {
       const evtSource = new EventSource('/api/events');
-
-      evtSource.onmessage = (event) => {
+      evtSource.onmessage = function(event) {
         try {
-          const payload = JSON.parse(event.data);
-          if (payload.type === 'tick') {
-            simulatorStatus = payload.data;
-            updateCountdownUI();
-          } else if (payload.type === 'transmit') {
-            fetchStatus();
-            loadAllHives();
+          const data = JSON.parse(event.data);
+          if (data.type === 'telemetry') {
             loadLogs();
-          } else if (payload.type === 'update' || payload.type === 'reset') {
             loadAllHives();
+            fetchStatus();
           }
-        } catch (err) {
-          console.error('Error handling SSE event', err);
-        }
+        } catch (err) {}
       };
-
-      evtSource.onerror = () => {
-        console.warn('SSE disconnected, reconnecting in 5s...');
-        evtSource.close();
-        setTimeout(connectEventStream, 5000);
-      };
-    }
-
-    // Keyboard Shortcuts
-    document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        e.preventDefault();
-        transmitAllNow();
-      }
-    });
-
-    // Initialize Dashboard
-    window.addEventListener('DOMContentLoaded', async () => {
-      await fetchStatus();
-      await loadAllHives();
-      await loadLogs();
-      connectEventStream();
-
-      // Periodic safety sync every 30 seconds
-      setInterval(() => {
-        fetchStatus();
-      }, 30000);
-    });
+    } catch (e) {}
   </script>
 </body>
 </html>
