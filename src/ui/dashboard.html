@@ -6,17 +6,17 @@
   <title>HoneyChain IoT Simulator — Edge Telemetry & Apiary Gateway Console</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-root: #090a0f;
-      --bg-surface: #10121a;
-      --bg-surface-elevated: #151824;
-      --bg-input: #0c0d14;
+      --bg-root: #07080c;
+      --bg-surface: #0e1017;
+      --bg-surface-elevated: #141722;
+      --bg-input: #0a0b10;
       
       --border-subtle: rgba(255, 255, 255, 0.06);
       --border-medium: rgba(255, 255, 255, 0.12);
-      --border-hover: rgba(255, 255, 255, 0.2);
+      --border-hover: rgba(255, 255, 255, 0.22);
       
       --text-main: #f8fafc;
       --text-secondary: #94a3b8;
@@ -26,20 +26,20 @@
       --gold-main: #f59e0b;
       --gold-light: #fbbf24;
       --gold-deep: #d97706;
-      --gold-subtle: rgba(245, 158, 11, 0.08);
-      --gold-border: rgba(245, 158, 11, 0.25);
+      --gold-subtle: rgba(245, 158, 11, 0.09);
+      --gold-border: rgba(245, 158, 11, 0.28);
       
       --green-main: #10b981;
-      --green-subtle: rgba(16, 185, 129, 0.08);
-      --green-border: rgba(16, 185, 129, 0.22);
+      --green-subtle: rgba(16, 185, 129, 0.09);
+      --green-border: rgba(16, 185, 129, 0.25);
       
       --rose-main: #f43f5e;
-      --rose-subtle: rgba(244, 63, 94, 0.08);
-      --rose-border: rgba(244, 63, 94, 0.22);
+      --rose-subtle: rgba(244, 63, 94, 0.09);
+      --rose-border: rgba(244, 63, 94, 0.25);
       
       --sky-main: #38bdf8;
-      --sky-subtle: rgba(56, 189, 248, 0.08);
-      --sky-border: rgba(56, 189, 248, 0.22);
+      --sky-subtle: rgba(56, 189, 248, 0.09);
+      --sky-border: rgba(56, 189, 248, 0.25);
       
       --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
@@ -50,6 +50,9 @@
       --radius-pill: 9999px;
       
       --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      
+      --cursor-x: 50vw;
+      --cursor-y: 50vh;
     }
 
     * {
@@ -61,31 +64,44 @@
     body {
       background-color: var(--bg-root);
       background-image: 
-        radial-gradient(ellipse 70% 40% at 50% -10%, rgba(245, 158, 11, 0.05), transparent 70%),
-        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.015), transparent 50%);
+        radial-gradient(circle at var(--cursor-x) var(--cursor-y), rgba(245, 158, 11, 0.035) 0%, transparent 45%),
+        radial-gradient(ellipse 70% 40% at 50% -10%, rgba(245, 158, 11, 0.05), transparent 70%);
+      background-attachment: fixed;
       color: var(--text-main);
       font-family: var(--font-sans);
       min-height: 100vh;
-      padding: 40px 24px 80px;
+      padding: 36px 24px 80px;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Background Canvas */
+    #ambientCanvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.65;
     }
 
     .container {
       max-width: 1220px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
 
-    /* Top Navigation */
+    /* Header Bar */
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 16px;
-      padding-bottom: 24px;
+      padding-bottom: 22px;
       border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
 
     .brand-group {
@@ -95,22 +111,22 @@
     }
 
     .brand-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 9px;
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.02));
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0.02));
       border: 1px solid var(--gold-border);
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--gold-light);
-      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.12);
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.1);
       flex-shrink: 0;
     }
 
     .brand-text h1 {
       font-size: 18px;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: -0.02em;
       color: var(--text-main);
       display: flex;
@@ -120,8 +136,9 @@
 
     .brand-badge {
       font-family: var(--font-mono);
-      font-size: 11px;
-      font-weight: 500;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
       background: var(--bg-surface-elevated);
       color: var(--text-secondary);
       border: 1px solid var(--border-subtle);
@@ -130,7 +147,7 @@
     }
 
     .brand-text p {
-      font-size: 13px;
+      font-size: 12.5px;
       color: var(--text-muted);
       margin-top: 1px;
     }
@@ -138,7 +155,7 @@
     .header-pills {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
     }
 
@@ -153,11 +170,24 @@
       font-family: var(--font-mono);
       font-size: 12px;
       color: var(--text-secondary);
-      transition: border-color 0.2s;
+      transition: all 0.2s var(--ease);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
     }
 
     .status-capsule-link:hover {
       border-color: var(--border-medium);
+      color: var(--text-main);
+    }
+
+    .btn-audio-toggle {
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+    }
+
+    .btn-audio-toggle:hover {
+      border-color: var(--gold-border);
+      color: var(--gold-light);
     }
 
     .pulse-dot {
@@ -166,31 +196,60 @@
       border-radius: 50%;
       background: var(--green-main);
       box-shadow: 0 0 8px var(--green-main);
+      animation: pulseGlow 2.5s infinite;
     }
 
-    /* Master Cadence HUD (Clean, Spacious, Uncluttered) */
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.85); }
+    }
+
+    /* Master Cadence HUD */
     .master-hud {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       padding: 24px 30px;
-      margin-bottom: 32px;
-      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.4);
+      margin-bottom: 24px;
+      box-shadow: 0 14px 35px -10px rgba(0, 0, 0, 0.45);
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
       gap: 32px;
       position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s;
     }
 
     .master-hud::before {
       content: '';
       position: absolute;
       top: 0;
-      left: 24px;
-      right: 24px;
+      left: 20px;
+      right: 20px;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.4), transparent);
+      background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.5), transparent);
+    }
+
+    /* Laser scan line animation on transmission */
+    .hud-scan-beam {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 30%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.12), transparent);
+      transform: translateX(-100%);
+      pointer-events: none;
+    }
+
+    .hud-scan-beam.active {
+      animation: scanBeam 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes scanBeam {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(400%); }
     }
 
     @media (max-width: 900px) {
@@ -208,15 +267,15 @@
 
     .hud-dial-wrap {
       position: relative;
-      width: 76px;
-      height: 76px;
+      width: 78px;
+      height: 78px;
       flex-shrink: 0;
     }
 
     .dial-svg {
       transform: rotate(-90deg);
-      width: 76px;
-      height: 76px;
+      width: 78px;
+      height: 78px;
     }
 
     .dial-bg {
@@ -230,10 +289,10 @@
       stroke: var(--gold-main);
       stroke-width: 3.5;
       stroke-linecap: round;
-      stroke-dasharray: 226.19; /* 2 * PI * 36 */
+      stroke-dasharray: 226.19;
       stroke-dashoffset: 0;
       transition: stroke-dashoffset 0.8s var(--ease);
-      filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.35));
+      filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.4));
     }
 
     .dial-icon {
@@ -247,7 +306,7 @@
 
     .timer-readout h2 {
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -256,8 +315,8 @@
 
     .timer-readout .countdown-digits {
       font-family: var(--font-mono);
-      font-size: 32px;
-      font-weight: 600;
+      font-size: 34px;
+      font-weight: 700;
       color: var(--text-main);
       letter-spacing: -0.02em;
       display: flex;
@@ -293,7 +352,7 @@
       border-radius: var(--radius-pill);
       font-family: var(--font-mono);
       font-size: 11px;
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .hud-metrics-row {
@@ -307,7 +366,7 @@
     .progress-rail {
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border-subtle);
-      height: 4px;
+      height: 5px;
       border-radius: var(--radius-pill);
       overflow: hidden;
     }
@@ -323,24 +382,28 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: var(--gold-main);
-      color: #090a0f;
+      background: linear-gradient(135deg, var(--gold-main), var(--gold-deep));
+      color: #08090d;
       font-family: var(--font-sans);
       font-size: 13px;
-      font-weight: 600;
-      padding: 10px 18px;
+      font-weight: 700;
+      padding: 11px 20px;
       border-radius: var(--radius-md);
-      border: none;
+      border: 1px solid rgba(255, 255, 255, 0.15);
       cursor: pointer;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 0 16px rgba(245, 158, 11, 0.2);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 0 18px rgba(245, 158, 11, 0.25);
       transition: all 0.2s var(--ease);
       white-space: nowrap;
     }
 
     .btn-batch-primary:hover {
-      background: var(--gold-light);
+      background: linear-gradient(135deg, var(--gold-light), var(--gold-main));
       transform: translateY(-1px);
-      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
+      box-shadow: 0 4px 22px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-batch-primary:active {
+      transform: translateY(0);
     }
 
     .btn-batch-primary:disabled {
@@ -350,17 +413,101 @@
       box-shadow: none;
     }
 
+    /* Interactive Mission Control Pipeline */
+    .mission-pipeline-strip {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 20px;
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      overflow-x: auto;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .pipeline-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .p-node-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .p-node-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .p-node-title {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .p-node-sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .pipeline-connector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 60px;
+      position: relative;
+    }
+
+    .conn-line {
+      height: 1px;
+      background: var(--border-medium);
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .conn-pulse {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 30px;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, var(--gold-main), transparent);
+      animation: pipelinePulse 2.8s infinite linear;
+    }
+
+    @keyframes pipelinePulse {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(400%); }
+    }
+
     /* Section Bar */
     .section-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .section-title {
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: -0.01em;
       color: var(--text-main);
       display: flex;
@@ -373,12 +520,12 @@
       color: var(--text-muted);
     }
 
-    /* Hives Grid (Spacious, Clean, Uncrowded) */
+    /* Hives Container */
     .hives-container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
       gap: 24px;
-      margin-bottom: 36px;
+      margin-bottom: 32px;
     }
 
     @media (max-width: 600px) {
@@ -392,16 +539,19 @@
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       padding: 24px;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.35);
-      transition: border-color 0.2s;
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.4);
+      transition: all 0.25s var(--ease);
+      position: relative;
+      overflow: hidden;
     }
 
     .hive-card:hover {
       border-color: var(--border-medium);
+      box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.55);
     }
 
     .hive-card.customized {
-      border-color: rgba(245, 158, 11, 0.35);
+      border-color: rgba(245, 158, 11, 0.4);
     }
 
     .card-top-bar {
@@ -410,7 +560,7 @@
       align-items: center;
       padding-bottom: 16px;
       border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .node-identity {
@@ -420,22 +570,22 @@
     }
 
     .node-icon {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
       background: var(--gold-subtle);
       border: 1px solid var(--gold-border);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--gold-main);
+      color: var(--gold-light);
       flex-shrink: 0;
     }
 
     .node-title-group h3 {
       font-family: var(--font-mono);
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 15.5px;
+      font-weight: 700;
       color: var(--text-main);
       letter-spacing: -0.01em;
     }
@@ -447,11 +597,36 @@
       margin-top: 1px;
     }
 
+    /* Live Colony Vital Sparkline */
+    .bio-wave-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bio-sparkline {
+      width: 68px;
+      height: 20px;
+    }
+
+    .bio-wave-path {
+      fill: none;
+      stroke: var(--emerald-main);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-dasharray: 80;
+      animation: waveDash 3.5s linear infinite;
+    }
+
+    @keyframes waveDash {
+      to { stroke-dashoffset: -160; }
+    }
+
     .node-status-badge {
       font-family: var(--font-mono);
       font-size: 11px;
-      font-weight: 500;
-      padding: 3px 9px;
+      font-weight: 600;
+      padding: 3px 10px;
       border-radius: var(--radius-pill);
       display: inline-flex;
       align-items: center;
@@ -477,7 +652,7 @@
       background: currentColor;
     }
 
-    /* Clean Streamlined Sensor List (No Cramped Boxes) */
+    /* Sensors Table */
     .sensors-table {
       width: 100%;
       margin-bottom: 20px;
@@ -503,7 +678,7 @@
 
     .sensor-name {
       font-size: 12.5px;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--text-secondary);
     }
 
@@ -520,11 +695,12 @@
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
       padding: 5px 10px;
-      transition: border-color 0.15s;
+      transition: border-color 0.15s, background-color 0.15s;
     }
 
     .sensor-input-cell:focus-within {
       border-color: rgba(245, 158, 11, 0.45);
+      background-color: var(--bg-surface-elevated);
     }
 
     .sensor-input {
@@ -533,7 +709,7 @@
       color: var(--text-main);
       font-family: var(--font-mono);
       font-size: 13.5px;
-      font-weight: 500;
+      font-weight: 600;
       width: 100%;
       outline: none;
     }
@@ -552,7 +728,7 @@
       padding: 3px 8px;
       font-family: var(--font-mono);
       font-size: 11px;
-      font-weight: 500;
+      font-weight: 600;
       border-radius: 4px;
       border: 1px solid var(--border-subtle);
       background: rgba(255, 255, 255, 0.02);
@@ -563,11 +739,12 @@
 
     .btn-key:hover {
       color: var(--text-main);
-      background: rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.08);
       border-color: var(--border-medium);
+      transform: translateY(-0.5px);
     }
 
-    /* Streamlined Scenario Preset Bar */
+    /* Scenario Selector Toolbar */
     .presets-toolbar {
       display: flex;
       align-items: center;
@@ -583,7 +760,7 @@
 
     .presets-title {
       font-size: 11.5px;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--text-secondary);
       display: flex;
       align-items: center;
@@ -599,7 +776,7 @@
 
     .pill-quick {
       font-size: 11px;
-      font-weight: 500;
+      font-weight: 600;
       font-family: var(--font-mono);
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border-subtle);
@@ -614,11 +791,12 @@
       background: rgba(255, 255, 255, 0.08);
       color: var(--text-main);
       border-color: var(--border-medium);
+      transform: translateY(-1px);
     }
 
     .pill-quick.fuzz {
       color: #fda4af;
-      background: rgba(244, 63, 94, 0.05);
+      background: rgba(244, 63, 94, 0.04);
       border-color: rgba(244, 63, 94, 0.2);
     }
 
@@ -638,6 +816,7 @@
       border-radius: var(--radius-sm);
       outline: none;
       cursor: pointer;
+      transition: border-color 0.15s;
     }
 
     .preset-select:focus {
@@ -675,11 +854,11 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(255, 255, 255, 0.02);
+      background: rgba(255, 255, 255, 0.025);
       border: 1px solid var(--border-subtle);
       color: var(--text-secondary);
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 600;
       padding: 6px 12px;
       border-radius: var(--radius-sm);
       cursor: pointer;
@@ -687,7 +866,7 @@
     }
 
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.07);
       color: var(--text-main);
       border-color: var(--border-medium);
     }
@@ -696,29 +875,30 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: var(--gold-main);
-      border: none;
-      color: #090a0f;
+      background: linear-gradient(135deg, var(--gold-main), var(--gold-deep));
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #08090d;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       padding: 6px 14px;
       border-radius: var(--radius-sm);
       cursor: pointer;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.25);
       transition: all 0.15s ease;
     }
 
     .btn-action-send:hover {
-      background: var(--gold-light);
-      box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+      background: linear-gradient(135deg, var(--gold-light), var(--gold-main));
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
     }
 
-    /* Logs Terminal Panel */
+    /* Logs Terminal Section */
     .logs-section {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       padding: 22px 26px;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.4);
     }
 
     .logs-header {
@@ -735,7 +915,7 @@
       align-items: center;
       gap: 9px;
       font-size: 13.5px;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-main);
     }
 
@@ -791,7 +971,7 @@
       border: none;
       color: var(--text-muted);
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 600;
       padding: 4px 10px;
       border-radius: 4px;
       cursor: pointer;
@@ -828,7 +1008,7 @@
       border: 1px solid var(--border-subtle);
       color: var(--text-muted);
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 600;
       padding: 5px 11px;
       border-radius: var(--radius-sm);
       cursor: pointer;
@@ -857,16 +1037,16 @@
     th {
       background: var(--bg-surface-elevated);
       color: var(--text-muted);
-      padding: 10px 14px;
-      font-weight: 600;
-      font-size: 11px;
+      padding: 11px 15px;
+      font-weight: 700;
+      font-size: 10.5px;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       border-bottom: 1px solid var(--border-subtle);
     }
 
     td {
-      padding: 10px 14px;
+      padding: 11px 15px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.03);
       font-family: var(--font-mono);
       color: var(--text-secondary);
@@ -893,7 +1073,7 @@
       padding: 2px 7px;
       border-radius: 4px;
       font-size: 11px;
-      font-weight: 500;
+      font-weight: 600;
       font-family: var(--font-mono);
     }
 
@@ -923,7 +1103,7 @@
 
     .empty-logs {
       text-align: center;
-      padding: 36px 16px;
+      padding: 38px 16px;
       color: var(--text-muted);
       font-size: 13px;
     }
@@ -947,20 +1127,20 @@
       position: fixed;
       bottom: 24px;
       right: 24px;
-      background: rgba(16, 18, 26, 0.95);
-      backdrop-filter: blur(16px);
+      background: rgba(14, 16, 23, 0.96);
+      backdrop-filter: blur(20px);
       border: 1px solid var(--border-medium);
       color: var(--text-main);
-      padding: 10px 18px;
+      padding: 11px 20px;
       border-radius: var(--radius-md);
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       display: flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
       opacity: 0;
-      transform: translateY(12px);
+      transform: translateY(14px);
       transition: all 0.25s var(--ease);
       pointer-events: none;
       z-index: 1000;
@@ -980,7 +1160,7 @@
 
     footer {
       margin-top: 48px;
-      padding-top: 20px;
+      padding-top: 22px;
       border-top: 1px solid var(--border-subtle);
       display: flex;
       justify-content: space-between;
@@ -1002,12 +1182,15 @@
   </style>
 </head>
 <body>
+  <!-- Ambient Living Canvas -->
+  <canvas id="ambientCanvas"></canvas>
+
   <div class="container">
     <!-- Header -->
     <header>
       <div class="brand-group">
         <div class="brand-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2L21 7.2V16.8L12 22L3 16.8V7.2L12 2Z"/>
             <path d="M12 8V16"/>
             <path d="M12 12L19 16"/>
@@ -1015,8 +1198,8 @@
           </svg>
         </div>
         <div class="brand-text">
-          <h1>HoneyChain IoT Simulator <span class="brand-badge">v2.2</span></h1>
-          <p>Smart Apiary Autonomous Telemetry Dispatcher & Anomaly Injection Engine</p>
+          <h1>HoneyChain IoT Simulator <span class="brand-badge">v2.3 Mission</span></h1>
+          <p>Autonomous Apiary Edge Gateway • Biological Telemetry & Anomaly Fuzzing Engine</p>
         </div>
       </div>
       <div class="header-pills">
@@ -1029,19 +1212,26 @@
           <span style="color: var(--text-muted);">Health:</span>
           <strong id="ribbonHealth" style="color: var(--green-main);">Healthy (201 OK)</strong>
         </div>
-        <!-- Hidden helper span to satisfy test bindings seamlessly -->
+        <!-- Audio Synthesizer Toggle -->
+        <button class="status-capsule-link btn-audio-toggle" id="btnAudioToggle" onclick="toggleAudio()" title="Toggle Web Audio Telemetry FX">
+          <span id="audioIcon">🔈</span>
+          <span id="audioStatusText">Sound FX: Off</span>
+        </button>
+        <!-- Hidden test helper -->
         <span id="countdownTableSpan" style="display: none;">--:--</span>
       </div>
     </header>
 
     <!-- Master Cadence HUD -->
-    <div class="master-hud">
+    <div class="master-hud" id="masterHud">
+      <div class="hud-scan-beam" id="hudScanBeam"></div>
+
       <!-- Circular Countdown Ring & Digits -->
       <div class="hud-timer-col">
         <div class="hud-dial-wrap">
-          <svg class="dial-svg" viewBox="0 0 76 76">
-            <circle class="dial-bg" cx="38" cy="38" r="34" />
-            <circle class="dial-bar" id="gaugeCircle" cx="38" cy="38" r="34" />
+          <svg class="dial-svg" viewBox="0 0 78 78">
+            <circle class="dial-bg" cx="39" cy="39" r="35" />
+            <circle class="dial-bar" id="gaugeCircle" cx="39" cy="39" r="35" />
           </svg>
           <div class="dial-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1077,11 +1267,46 @@
       <!-- Primary Action -->
       <div>
         <button class="btn-batch-primary" id="btnTransmitAll" onclick="transmitAllNow()" title="Send telemetry batch immediately (resets interval)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
           </svg>
           <span>Transmit Batch Now</span>
         </button>
+      </div>
+    </div>
+
+    <!-- Mission Control Pipeline Visualizer -->
+    <div class="mission-pipeline-strip">
+      <div class="pipeline-step">
+        <div class="p-node-badge">🐝</div>
+        <div class="p-node-info">
+          <span class="p-node-title">Virtual Hives</span>
+          <span class="p-node-sub">HIVE-SB-101 / KV-201</span>
+        </div>
+      </div>
+
+      <div class="pipeline-connector">
+        <div class="conn-line"><div class="conn-pulse"></div></div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="p-node-badge">📡</div>
+        <div class="p-node-info">
+          <span class="p-node-title">Physical Hardware</span>
+          <span class="p-node-sub">ESP32 Gateway (HIVE-WG-301)</span>
+        </div>
+      </div>
+
+      <div class="pipeline-connector">
+        <div class="conn-line"><div class="conn-pulse"></div></div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="p-node-badge">⚡</div>
+        <div class="p-node-info">
+          <span class="p-node-title">HoneyChain Ingestion</span>
+          <span class="p-node-sub">REST /telemetry (201 Created)</span>
+        </div>
       </div>
     </div>
 
@@ -1097,7 +1322,7 @@
     </div>
 
     <div class="hives-container" id="hivesGrid">
-      <!-- Injected via JavaScript -->
+      <!-- Dynamically rendered via renderHiveCards() -->
     </div>
 
     <!-- Telemetry Transmission Feed -->
@@ -1189,6 +1414,144 @@
   </div>
 
   <script>
+    // Audio Synthesizer State
+    let audioEnabled = false;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleAudio() {
+      initAudio();
+      audioEnabled = !audioEnabled;
+      const statusText = document.getElementById('audioStatusText');
+      const icon = document.getElementById('audioIcon');
+      if (audioEnabled) {
+        statusText.innerText = "Sound FX: On";
+        icon.innerText = "🔊";
+        playClickSound(1200, 0.04);
+        showToast("Audio FX Enabled");
+      } else {
+        statusText.innerText = "Sound FX: Off";
+        icon.innerText = "🔈";
+        showToast("Audio FX Muted");
+      }
+    }
+
+    function playTone(freq, duration, type = 'sine', gainVal = 0.03) {
+      if (!audioEnabled || !audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playClickSound() {
+      playTone(900, 0.03, 'sine', 0.025);
+    }
+
+    function playTransmitChime() {
+      if (!audioEnabled || !audioCtx) return;
+      playTone(523.25, 0.08, 'triangle', 0.04); // C5
+      setTimeout(() => playTone(659.25, 0.08, 'triangle', 0.04), 60); // E5
+      setTimeout(() => playTone(783.99, 0.14, 'triangle', 0.04), 120); // G5
+    }
+
+    function playAlertChime() {
+      if (!audioEnabled || !audioCtx) return;
+      playTone(600, 0.06, 'sawtooth', 0.02);
+      setTimeout(() => playTone(400, 0.1, 'sawtooth', 0.02), 70);
+    }
+
+    // Dynamic Ambient Canvas (Bioluminescent Micro-Particles)
+    (function setupAmbientCanvas() {
+      const canvas = document.getElementById('ambientCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let width, height;
+      let particles = [];
+      const particleCount = 42;
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.35,
+          vy: (Math.random() - 0.5) * 0.35,
+          radius: Math.random() * 1.5 + 0.8,
+          alpha: Math.random() * 0.35 + 0.15
+        });
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, width, height);
+
+        // Draw connecting hairline links
+        for (let i = 0; i < particleCount; i++) {
+          for (let j = i + 1; j < particleCount; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 90) {
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.strokeStyle = `rgba(245, 158, 11, ${0.12 * (1 - dist / 90)})`;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
+        }
+
+        // Draw gentle particles
+        for (let p of particles) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(251, 191, 36, ${p.alpha})`;
+          ctx.fill();
+
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < 0) p.x = width;
+          if (p.x > width) p.x = 0;
+          if (p.y < 0) p.y = height;
+          if (p.y > height) p.y = 0;
+        }
+
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+    })();
+
+    // Track Cursor for Dynamic Spotlight
+    window.addEventListener('mousemove', (e) => {
+      document.documentElement.style.setProperty('--cursor-x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--cursor-y', `${e.clientY}px`);
+    });
+
     let hivesData = [];
     let currentLogs = [];
     let activeLogFilter = 'all';
@@ -1232,10 +1595,10 @@
       const elapsed = Math.max(0, totalSec - sec);
       const pct = Math.min(100, Math.max(0, Math.round((elapsed / totalSec) * 100)));
 
-      // Circumference for r=34 is 2 * PI * 34 ≈ 213.63
+      // Circumference for r=35 is 2 * PI * 35 ≈ 219.91
       const circle = document.getElementById('gaugeCircle');
       if (circle) {
-        const offset = 213.63 - (pct / 100) * 213.63;
+        const offset = 219.91 - (pct / 100) * 219.91;
         circle.style.strokeDashoffset = offset;
       }
 
@@ -1298,7 +1661,7 @@
       }
     }
 
-    // Render Streamlined Hive Cards
+    // Render Streamlined Hive Cards with living biological waveform
     function renderHiveCards(hives) {
       const container = document.getElementById('hivesGrid');
       
@@ -1311,6 +1674,7 @@
 
       hives.forEach(hive => {
         const p = hive.pendingPayload;
+        const waveColor = hive.isManipulated ? 'var(--gold-main)' : 'var(--emerald-main)';
 
         const card = document.createElement('div');
         card.className = `hive-card ${hive.isManipulated ? 'customized' : ''}`;
@@ -1320,7 +1684,7 @@
           <div class="card-top-bar">
             <div class="node-identity">
               <div class="node-icon">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 2L21 7.2V16.8L12 22L3 16.8V7.2L12 2Z"/>
                 </svg>
               </div>
@@ -1329,10 +1693,17 @@
                 <div class="node-meta">${hive.deviceId} • ${hive.region || 'Smart Apiary Node'}</div>
               </div>
             </div>
-            <span class="node-status-badge ${hive.isManipulated ? 'badge-custom' : 'badge-auto'}" id="status-badge-${hive.hiveId}">
-              <span class="badge-dot"></span>
-              ${hive.isManipulated ? 'Manual Override' : 'Natural Physics'}
-            </span>
+
+            <!-- Living Colony Vital Sparkline -->
+            <div class="bio-wave-wrap">
+              <svg class="bio-sparkline" viewBox="0 0 70 20">
+                <path class="bio-wave-path" style="stroke: ${waveColor};" d="M0,10 Q10,2 20,10 T40,10 T60,10 T80,10" />
+              </svg>
+              <span class="node-status-badge ${hive.isManipulated ? 'badge-custom' : 'badge-auto'}" id="status-badge-${hive.hiveId}">
+                <span class="badge-dot"></span>
+                ${hive.isManipulated ? 'Manual Override' : 'Natural Physics'}
+              </span>
+            </div>
           </div>
 
           <!-- Clean Streamlined Sensor List -->
@@ -1521,6 +1892,7 @@
 
     // Set special value (null or NaN) into an input field
     function setSpecialValue(inputId, value) {
+      playClickSound();
       const el = document.getElementById(inputId);
       if (el) {
         el.value = value;
@@ -1542,6 +1914,7 @@
 
     // Save Hive Overrides via REST
     async function saveHiveOverrides(hiveId) {
+      playClickSound();
       const payload = {
         temperature: parseFieldValue(document.getElementById(`input-temp-${hiveId}`)?.value),
         humidity: parseFieldValue(document.getElementById(`input-hum-${hiveId}`)?.value),
@@ -1575,6 +1948,7 @@
 
     // Apply Scenario Preset
     async function applyPreset(hiveId, preset) {
+      playAlertChime();
       try {
         const res = await fetch(`/api/hives/${hiveId}/preset`, {
           method: 'POST',
@@ -1592,6 +1966,7 @@
 
     // Revert Hive Overrides back to natural physics
     async function resetHive(hiveId) {
+      playClickSound();
       try {
         const res = await fetch(`/api/hives/${hiveId}/reset`, { method: 'POST' });
         if (res.ok) {
@@ -1603,8 +1978,20 @@
       }
     }
 
+    // Trigger HUD Laser Scan Animation
+    function triggerLaserScan() {
+      const beam = document.getElementById('hudScanBeam');
+      if (beam) {
+        beam.classList.remove('active');
+        void beam.offsetWidth; // force reflow
+        beam.classList.add('active');
+      }
+    }
+
     // Transmit single hive immediately
     async function transmitHiveNow(hiveId) {
+      playTransmitChime();
+      triggerLaserScan();
       try {
         showToast(`Transmitting telemetry for ${hiveId}...`);
         const res = await fetch(`/api/hives/${hiveId}/transmit`, { method: 'POST' });
@@ -1623,6 +2010,8 @@
 
     // Transmit all hives batch immediately
     async function transmitAllNow() {
+      playTransmitChime();
+      triggerLaserScan();
       const btn = document.getElementById('btnTransmitAll');
       btn.disabled = true;
       btn.innerHTML = `
@@ -1645,7 +2034,7 @@
       } finally {
         btn.disabled = false;
         btn.innerHTML = `
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
           </svg>
           <span>Transmit Batch Now</span>
@@ -1670,12 +2059,14 @@
 
     // Handle Log Search Input
     function handleLogSearch() {
+      playClickSound();
       logSearchTerm = document.getElementById('logSearchInput').value.trim().toLowerCase();
       renderLogs(filterLogsList(currentLogs));
     }
 
     // Set Active Log Filter Tab
     function setLogFilter(filter) {
+      playClickSound();
       activeLogFilter = filter;
       ['tabAll', 'tab201', 'tab400', 'tab200'].forEach(id => {
         const btn = document.getElementById(id);
@@ -1721,7 +2112,7 @@
     function renderLogs(logs) {
       const tbody = document.getElementById('logsTableBody');
       if (!logs || logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="empty-logs">No telemetry transmissions match current filter.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-logs">No telemetry transmissions logged yet. Waiting for cycle expiry or manual dispatch.</td></tr>`;
         return;
       }
 
@@ -1763,7 +2154,7 @@
         trDetail.id = `payload-row-${index}`;
         trDetail.style.display = 'none';
         trDetail.innerHTML = `
-          <td colspan="7" style="padding: 12px 16px; background: rgba(0, 0, 0, 0.25);">
+          <td colspan="7" style="padding: 12px 16px; background: rgba(0, 0, 0, 0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
               <span style="font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.06em;">Transmitted Payload (JSON):</span>
               <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="copyJsonPayload(${index})">Copy JSON</button>
@@ -1782,6 +2173,7 @@
     }
 
     function togglePayloadRow(id) {
+      playClickSound();
       const row = document.getElementById(id);
       if (row) {
         row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
@@ -1789,6 +2181,7 @@
     }
 
     function copyJsonPayload(index) {
+      playClickSound();
       const log = currentLogs[index];
       if (log && log.payload) {
         navigator.clipboard.writeText(JSON.stringify(log.payload, null, 2));
@@ -1803,6 +2196,7 @@
 
     // Clear logs
     async function clearLogs() {
+      playClickSound();
       try {
         await fetch('/api/logs', { method: 'DELETE' });
         currentLogs = [];
