@@ -37,61 +37,15 @@ export function createSimulatorApp(engine: SimulationEngine): express.Express {
   app.use(cors());
   app.use(express.json());
 
-  // Serve UI Dashboard directly at root '/' and '/ui'
-  // When accessed via the root link or /ui, directly serves the UI and triggers telemetry dispatch to backend
+  // Serve UI Dashboard directly at root '/' and '/ui' without redirecting
   const dashboardPath = resolveDashboardPath();
-  let lastLinkDispatchTime = 0;
 
   app.get("/favicon.ico", (_req: Request, res: Response) => {
     res.status(204).end();
   });
 
-  const handleRootOrUi = async (req: Request, res: Response) => {
-    const wantsJson =
-      req.xhr ||
-      (req.headers.accept &&
-        req.headers.accept.includes("application/json") &&
-        !req.headers.accept.includes("text/html")) ||
-      req.query.format === "json";
-
-    // Trigger telemetry transmission to backend on access (with 2s debounce to prevent duplicate browser pre-fetches)
-    const now = Date.now();
-    let dispatchPromise: Promise<any> | null = null;
-    if (now - lastLinkDispatchTime > 2000) {
-      lastLinkDispatchTime = now;
-      dispatchPromise = engine.transmitBatch().catch((err) => {
-        console.error(`[SIMULATOR] Error transmitting batch on link access: ${err.message}`);
-      });
-    }
-
-    if (wantsJson) {
-      const summary = dispatchPromise ? await dispatchPromise : { message: "Cycle already in progress or recently sent" };
-      return res.json({
-        success: true,
-        message: "Telemetry dispatched to backend from link access",
-        status: engine.getStatus(),
-        transmission: summary,
-      });
-    }
-
-    return res.sendFile(dashboardPath);
-  };
-
-  app.get("/", handleRootOrUi);
-  app.get("/ui", handleRootOrUi);
-
-  // POST / triggers telemetry batch transmission directly
-  app.post("/", async (_req: Request, res: Response) => {
-    try {
-      const summary = await engine.transmitBatch();
-      res.json({
-        success: true,
-        message: "Telemetry batch transmitted successfully",
-        summary,
-      });
-    } catch (err: any) {
-      res.status(500).json({ success: false, error: err.message });
-    }
+  app.get(["/", "/ui"], (_req: Request, res: Response) => {
+    res.sendFile(dashboardPath);
   });
 
   // Simulator Status & Countdown

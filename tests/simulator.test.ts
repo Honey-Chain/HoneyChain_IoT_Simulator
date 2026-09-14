@@ -384,24 +384,23 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
       expect(text).to.include("HoneyChain IoT Simulator");
     });
 
-    it("POST / triggers telemetry batch transmission directly", async function () {
-      const res = await originalFetch(`${baseUrl}/`, { method: "POST" });
-      expect(res.status).to.equal(200);
-      const data = await res.json();
-      expect(data.success).to.be.true;
-      expect(data.message).to.include("transmitted successfully");
-      expect(data.summary).to.be.an("object");
-    });
+    it("GET / does NOT trigger telemetry transmission or restart the countdown timer", async function () {
+      let fetchCalled = false;
+      global.fetch = async () => {
+        fetchCalled = true;
+        return new Response(JSON.stringify({ success: true }), { status: 201 });
+      };
 
-    it("GET / with application/json header returns transmission summary", async function () {
-      const res = await originalFetch(`${baseUrl}/`, {
-        headers: { Accept: "application/json" },
-      });
+      const statusBefore = engine.getStatus();
+      const res = await originalFetch(`${baseUrl}/`);
       expect(res.status).to.equal(200);
-      const data = await res.json();
-      expect(data.success).to.be.true;
-      expect(data.message).to.include("Telemetry dispatched");
-      expect(data.status).to.be.an("object");
+
+      // Verify no fetch was triggered by viewing/refreshing the page
+      expect(fetchCalled).to.be.false;
+
+      const statusAfter = engine.getStatus();
+      // Ensure the next batch timestamp was not reset/pushed into the future
+      expect(statusAfter.nextBatchAt).to.equal(statusBefore.nextBatchAt);
     });
 
     it("GET /api/status returns simulator countdown and cadence", async function () {
