@@ -99,7 +99,7 @@ async function main() {
   console.log(`[CONFIG] Monitored Devices  : ${initialDevices.map(d => d.hiveId).join(", ")} (${initialDevices.length} hives)`);
   console.log(`[CONFIG] Interval (.env)    : ${intervalMs} ms (${(intervalMs / 1000).toFixed(0)}s / ${(intervalMs / 60000).toFixed(1)}m)`);
   if (!cli.noUi && webServer) {
-    console.log(`[UI]     Web Dashboard      : http://localhost:${uiPort}/ui`);
+    console.log(`[UI]     Web Dashboard      : http://localhost:${uiPort}/ (and /ui)`);
     console.log(`[UI]     REST Status API    : http://localhost:${uiPort}/api/status`);
   }
   console.log("=======================================================\n");

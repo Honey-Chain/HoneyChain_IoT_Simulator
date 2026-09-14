@@ -369,18 +369,39 @@ describe("HoneyChain Standalone IoT Edge Simulator Test Suite", function () {
       if (server) server.close();
     });
 
-    it("GET /ui serves dashboard HTML interface", async function () {
-      const res = await originalFetch(`${baseUrl}/ui`);
+    it("GET / serves dashboard HTML interface directly without redirect", async function () {
+      const res = await originalFetch(`${baseUrl}/`);
       expect(res.status).to.equal(200);
       const text = await res.text();
       expect(text).to.include("HoneyChain IoT Simulator");
       expect(text).to.include("Next Batch Auto-Transmission");
     });
 
-    it("GET / redirects to /ui", async function () {
-      const res = await originalFetch(`${baseUrl}/`, { redirect: "manual" });
-      expect(res.status).to.equal(302);
-      expect(res.headers.get("location")).to.equal("/ui");
+    it("GET /ui serves dashboard HTML interface", async function () {
+      const res = await originalFetch(`${baseUrl}/ui`);
+      expect(res.status).to.equal(200);
+      const text = await res.text();
+      expect(text).to.include("HoneyChain IoT Simulator");
+    });
+
+    it("POST / triggers telemetry batch transmission directly", async function () {
+      const res = await originalFetch(`${baseUrl}/`, { method: "POST" });
+      expect(res.status).to.equal(200);
+      const data = await res.json();
+      expect(data.success).to.be.true;
+      expect(data.message).to.include("transmitted successfully");
+      expect(data.summary).to.be.an("object");
+    });
+
+    it("GET / with application/json header returns transmission summary", async function () {
+      const res = await originalFetch(`${baseUrl}/`, {
+        headers: { Accept: "application/json" },
+      });
+      expect(res.status).to.equal(200);
+      const data = await res.json();
+      expect(data.success).to.be.true;
+      expect(data.message).to.include("Telemetry dispatched");
+      expect(data.status).to.be.an("object");
     });
 
     it("GET /api/status returns simulator countdown and cadence", async function () {
