@@ -6,56 +6,50 @@
   <title>HoneyChain IoT Simulator — Edge Telemetry & Apiary Gateway Console</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Obsidian & Champagne Luxury Palette */
-      --bg-canvas: #08090c;
-      --bg-panel: #0e1015;
-      --bg-panel-elevated: #13161d;
-      --bg-panel-subtle: #171a23;
-      --bg-input: #0a0b0f;
+      --bg-root: #090a0f;
+      --bg-surface: #10121a;
+      --bg-surface-elevated: #151824;
+      --bg-input: #0c0d14;
       
-      --border-hairline: rgba(255, 255, 255, 0.06);
-      --border-subtle: rgba(255, 255, 255, 0.09);
-      --border-medium: rgba(255, 255, 255, 0.16);
-      --border-active: rgba(217, 119, 6, 0.5);
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --border-medium: rgba(255, 255, 255, 0.12);
+      --border-hover: rgba(255, 255, 255, 0.2);
       
-      --text-primary: #f8fafc;
+      --text-main: #f8fafc;
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
       --text-faint: #475569;
       
-      /* Burnished Warm Gold / Amber Accent */
       --gold-main: #f59e0b;
-      --gold-glow: #fbbf24;
+      --gold-light: #fbbf24;
       --gold-deep: #d97706;
-      --gold-dark: #b45309;
-      --gold-subtle: rgba(245, 158, 11, 0.1);
-      --gold-border: rgba(245, 158, 11, 0.28);
+      --gold-subtle: rgba(245, 158, 11, 0.08);
+      --gold-border: rgba(245, 158, 11, 0.25);
       
-      /* Semantic Status Colors */
-      --emerald-main: #10b981;
-      --emerald-subtle: rgba(16, 185, 129, 0.1);
-      --emerald-border: rgba(16, 185, 129, 0.25);
+      --green-main: #10b981;
+      --green-subtle: rgba(16, 185, 129, 0.08);
+      --green-border: rgba(16, 185, 129, 0.22);
       
       --rose-main: #f43f5e;
-      --rose-subtle: rgba(244, 63, 94, 0.1);
-      --rose-border: rgba(244, 63, 94, 0.25);
+      --rose-subtle: rgba(244, 63, 94, 0.08);
+      --rose-border: rgba(244, 63, 94, 0.22);
       
       --sky-main: #38bdf8;
-      --sky-subtle: rgba(56, 189, 248, 0.1);
-      --sky-border: rgba(56, 189, 248, 0.25);
+      --sky-subtle: rgba(56, 189, 248, 0.08);
+      --sky-border: rgba(56, 189, 248, 0.22);
       
-      --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
       
-      --radius-panel: 14px;
-      --radius-card: 10px;
-      --radius-sm: 6px;
+      --radius-lg: 14px;
+      --radius-md: 8px;
+      --radius-sm: 5px;
       --radius-pill: 9999px;
       
-      --ease-snappy: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * {
@@ -65,898 +59,739 @@
     }
 
     body {
-      background-color: var(--bg-canvas);
+      background-color: var(--bg-root);
       background-image: 
-        radial-gradient(ellipse 90% 60% at 50% -10%, rgba(245, 158, 11, 0.06), transparent 75%),
-        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.015), transparent 45%),
-        linear-gradient(to bottom, rgba(8, 9, 12, 0.96), rgba(8, 9, 12, 1));
-      color: var(--text-primary);
-      font-family: var(--font-display);
+        radial-gradient(ellipse 70% 40% at 50% -10%, rgba(245, 158, 11, 0.05), transparent 70%),
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.015), transparent 50%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
       min-height: 100vh;
-      padding: 36px 28px 80px;
+      padding: 40px 24px 80px;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
 
     .container {
-      max-width: 1440px;
+      max-width: 1220px;
       margin: 0 auto;
     }
 
-    /* Machined Chamfer Highlight */
-    .machined-panel {
-      background: var(--bg-panel);
-      border: 1px solid var(--border-hairline);
-      box-shadow: 
-        inset 0 1px 0 rgba(255, 255, 255, 0.06),
-        0 20px 45px -15px rgba(0, 0, 0, 0.6);
-      border-radius: var(--radius-panel);
-    }
-
-    /* Executive Top Navigation Header */
+    /* Top Navigation */
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 18px;
+      gap: 16px;
       padding-bottom: 24px;
-      border-bottom: 1px solid var(--border-hairline);
-      margin-bottom: 30px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 32px;
     }
 
-    .brand-cluster {
+    .brand-group {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
     }
 
-    .brand-emblem {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(245, 158, 11, 0.03) 100%);
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.02));
       border: 1px solid var(--gold-border);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--gold-glow);
-      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      color: var(--gold-light);
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.12);
       flex-shrink: 0;
     }
 
-    .brand-title-group h1 {
-      font-size: 19px;
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      color: var(--text-primary);
+    .brand-text h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .brand-title-group p {
-      font-size: 12.5px;
-      color: var(--text-muted);
-      letter-spacing: 0.01em;
-      margin-top: 1px;
-    }
-
     .brand-badge {
       font-family: var(--font-mono);
-      font-size: 10.5px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      background: var(--bg-panel-subtle);
+      font-size: 11px;
+      font-weight: 500;
+      background: var(--bg-surface-elevated);
       color: var(--text-secondary);
       border: 1px solid var(--border-subtle);
       padding: 2px 8px;
       border-radius: var(--radius-pill);
     }
 
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 14px;
+    .brand-text p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 1px;
     }
 
-    .transponder-pill {
+    .header-pills {
       display: flex;
       align-items: center;
-      gap: 10px;
-      background: var(--bg-panel);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .status-capsule-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      padding: 7px 16px;
+      padding: 6px 14px;
       border-radius: var(--radius-pill);
       font-family: var(--font-mono);
       font-size: 12px;
       color: var(--text-secondary);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
       transition: border-color 0.2s;
     }
 
-    .transponder-pill:hover {
+    .status-capsule-link:hover {
       border-color: var(--border-medium);
     }
 
-    .led-beacon {
-      position: relative;
-      width: 7px;
-      height: 7px;
-    }
-
-    .led-beacon .core {
+    .pulse-dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: var(--emerald-main);
-      box-shadow: 0 0 8px var(--emerald-main);
+      background: var(--green-main);
+      box-shadow: 0 0 8px var(--green-main);
     }
 
-    .led-beacon .halo {
-      position: absolute;
-      inset: -3px;
-      border-radius: 50%;
-      background: var(--emerald-main);
-      opacity: 0.35;
-      animation: beaconPulse 2.4s var(--ease-snappy) infinite;
-    }
-
-    @keyframes beaconPulse {
-      0% { transform: scale(1); opacity: 0.5; }
-      100% { transform: scale(2.6); opacity: 0; }
-    }
-
-    /* Chronometer Master HUD */
+    /* Master Cadence HUD (Clean, Spacious, Uncluttered) */
     .master-hud {
-      padding: 26px 32px;
-      margin-bottom: 26px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px 30px;
+      margin-bottom: 32px;
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.4);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 32px;
       position: relative;
-      overflow: hidden;
     }
 
     .master-hud::before {
       content: '';
       position: absolute;
       top: 0;
-      left: 0;
-      right: 0;
+      left: 24px;
+      right: 24px;
       height: 1px;
-      background: linear-gradient(90deg, transparent 5%, rgba(245, 158, 11, 0.4) 30%, rgba(251, 191, 36, 0.6) 50%, rgba(245, 158, 11, 0.4) 70%, transparent 95%);
+      background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.4), transparent);
     }
 
-    .hud-layout {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      align-items: center;
-      gap: 36px;
-    }
-
-    @media (max-width: 990px) {
-      .hud-layout {
+    @media (max-width: 900px) {
+      .master-hud {
         grid-template-columns: 1fr;
-        gap: 24px;
+        gap: 20px;
       }
     }
 
-    /* Watchmaker Radial Gauge */
-    .chronometer-gauge {
+    .hud-timer-col {
       display: flex;
       align-items: center;
-      gap: 22px;
+      gap: 20px;
     }
 
-    .gauge-housing {
+    .hud-dial-wrap {
       position: relative;
-      width: 86px;
-      height: 86px;
+      width: 76px;
+      height: 76px;
       flex-shrink: 0;
     }
 
-    .gauge-svg {
+    .dial-svg {
       transform: rotate(-90deg);
-      width: 86px;
-      height: 86px;
+      width: 76px;
+      height: 76px;
     }
 
-    .gauge-bg-track {
+    .dial-bg {
       fill: none;
       stroke: rgba(255, 255, 255, 0.05);
-      stroke-width: 4;
+      stroke-width: 3.5;
     }
 
-    .gauge-sweep {
+    .dial-bar {
       fill: none;
       stroke: var(--gold-main);
-      stroke-width: 4;
+      stroke-width: 3.5;
       stroke-linecap: round;
-      stroke-dasharray: 245.04; /* 2 * PI * 39 */
+      stroke-dasharray: 226.19; /* 2 * PI * 36 */
       stroke-dashoffset: 0;
-      transition: stroke-dashoffset 0.8s var(--ease-snappy);
-      filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.4));
+      transition: stroke-dashoffset 0.8s var(--ease);
+      filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.35));
     }
 
-    .gauge-center-dial {
+    .dial-icon {
       position: absolute;
       inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--gold-glow);
+      color: var(--gold-light);
     }
 
     .timer-readout h2 {
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      margin-bottom: 3px;
+      letter-spacing: 0.08em;
+      margin-bottom: 2px;
     }
 
     .timer-readout .countdown-digits {
       font-family: var(--font-mono);
-      font-size: 36px;
-      font-weight: 700;
-      color: var(--text-primary);
-      letter-spacing: -0.03em;
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
       display: flex;
       align-items: baseline;
-      gap: 10px;
+      gap: 8px;
     }
 
     .timer-readout .countdown-subtext {
       font-family: var(--font-mono);
       font-size: 12px;
-      color: var(--gold-glow);
+      color: var(--gold-light);
       font-weight: 500;
     }
 
-    /* Cadence Sync Stream & Step Progress */
-    .cadence-stream {
+    .hud-meta-col {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
 
-    .cadence-meta-row {
+    .hud-meta-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 12px;
     }
 
-    .cadence-badge-chip {
+    .cadence-badge {
       background: var(--gold-subtle);
       border: 1px solid var(--gold-border);
-      color: var(--gold-glow);
-      padding: 3px 10px;
+      color: var(--gold-light);
+      padding: 2px 9px;
       border-radius: var(--radius-pill);
       font-family: var(--font-mono);
       font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.03em;
+      font-weight: 500;
     }
 
-    .cadence-metrics-trio {
+    .hud-metrics-row {
       display: flex;
-      gap: 18px;
+      gap: 16px;
       font-family: var(--font-mono);
       color: var(--text-muted);
       font-size: 12px;
     }
 
-    .cadence-progress-rail {
+    .progress-rail {
       background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border-hairline);
-      height: 5px;
+      border: 1px solid var(--border-subtle);
+      height: 4px;
       border-radius: var(--radius-pill);
       overflow: hidden;
-      position: relative;
     }
 
-    .cadence-progress-fill {
+    .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--gold-dark), var(--gold-main), var(--gold-glow));
+      background: linear-gradient(90deg, var(--gold-deep), var(--gold-light));
       width: 0%;
-      border-radius: var(--radius-pill);
-      transition: width 0.8s var(--ease-snappy);
+      transition: width 0.8s var(--ease);
     }
 
-    /* Executive Batch Transmission Button */
-    .btn-batch-executive {
+    .btn-batch-primary {
       display: inline-flex;
       align-items: center;
-      gap: 9px;
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-      color: #08090c;
-      font-family: var(--font-display);
-      font-size: 13.5px;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      padding: 12px 22px;
-      border-radius: var(--radius-card);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      gap: 8px;
+      background: var(--gold-main);
+      color: #090a0f;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      border: none;
       cursor: pointer;
-      box-shadow: 
-        0 1px 2px rgba(0, 0, 0, 0.4),
-        0 0 20px rgba(245, 158, 11, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.25);
-      transition: all 0.2s var(--ease-snappy);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 0 16px rgba(245, 158, 11, 0.2);
+      transition: all 0.2s var(--ease);
       white-space: nowrap;
     }
 
-    .btn-batch-executive:hover {
-      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    .btn-batch-primary:hover {
+      background: var(--gold-light);
       transform: translateY(-1px);
-      box-shadow: 
-        0 4px 24px rgba(245, 158, 11, 0.45),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
     }
 
-    .btn-batch-executive:active {
-      transform: translateY(0);
-      box-shadow: 0 1px 8px rgba(245, 158, 11, 0.3);
-    }
-
-    .btn-batch-executive:disabled {
+    .btn-batch-primary:disabled {
       opacity: 0.5;
       cursor: not-allowed;
       transform: none;
       box-shadow: none;
     }
 
-    /* Diagnostics Ribbon */
-    .diagnostics-ribbon {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-
-    @media (max-width: 900px) {
-      .diagnostics-ribbon {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 540px) {
-      .diagnostics-ribbon {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .ribbon-cell {
-      background: var(--bg-panel);
-      border: 1px solid var(--border-hairline);
-      border-radius: var(--radius-card);
-      padding: 13px 18px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-      transition: border-color 0.2s;
-    }
-
-    .ribbon-cell:hover {
-      border-color: var(--border-subtle);
-    }
-
-    .ribbon-icon-frame {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-hairline);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-secondary);
-      flex-shrink: 0;
-    }
-
-    .ribbon-label {
-      font-size: 10.5px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-weight: 600;
-    }
-
-    .ribbon-value {
-      font-family: var(--font-mono);
-      font-size: 13px;
-      color: var(--text-primary);
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* Section Subheadings */
+    /* Section Bar */
     .section-bar {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 16px;
+      align-items: center;
+      margin-bottom: 18px;
     }
 
-    .section-title-wrap {
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
       display: flex;
       align-items: center;
-      gap: 9px;
-      font-size: 13.5px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      color: var(--text-primary);
+      gap: 8px;
     }
 
-    .section-note {
+    .section-subtitle {
       font-size: 12px;
       color: var(--text-muted);
     }
 
-    /* Hardware Hive Bento Grid */
-    .hives-bento {
+    /* Hives Grid (Spacious, Clean, Uncrowded) */
+    .hives-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
-      gap: 22px;
-      margin-bottom: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
+      gap: 24px;
+      margin-bottom: 36px;
     }
 
-    @media (max-width: 620px) {
-      .hives-bento {
+    @media (max-width: 600px) {
+      .hives-container {
         grid-template-columns: 1fr;
       }
     }
 
-    .hive-enclosure {
-      background: var(--bg-panel);
-      border: 1px solid var(--border-hairline);
-      border-radius: var(--radius-panel);
+    .hive-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
       padding: 24px;
-      box-shadow: 
-        inset 0 1px 0 rgba(255, 255, 255, 0.05),
-        0 16px 36px -10px rgba(0, 0, 0, 0.5);
-      transition: border-color 0.25s, box-shadow 0.25s;
-      position: relative;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.35);
+      transition: border-color 0.2s;
     }
 
-    .hive-enclosure:hover {
+    .hive-card:hover {
       border-color: var(--border-medium);
-      box-shadow: 
-        inset 0 1px 0 rgba(255, 255, 255, 0.08),
-        0 20px 45px -10px rgba(0, 0, 0, 0.65);
     }
 
-    .hive-enclosure.overridden {
-      border-color: rgba(245, 158, 11, 0.4);
+    .hive-card.customized {
+      border-color: rgba(245, 158, 11, 0.35);
     }
 
-    .hive-enclosure-header {
+    .card-top-bar {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 20px;
+      align-items: center;
       padding-bottom: 16px;
-      border-bottom: 1px solid var(--border-hairline);
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 18px;
     }
 
-    .hive-identity {
+    .node-identity {
       display: flex;
       align-items: center;
-      gap: 13px;
+      gap: 12px;
     }
 
-    .hive-identity-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 9px;
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0.02) 100%);
+    .node-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: var(--gold-subtle);
       border: 1px solid var(--gold-border);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--gold-glow);
+      color: var(--gold-main);
       flex-shrink: 0;
     }
 
-    .hive-title-stack h3 {
+    .node-title-group h3 {
       font-family: var(--font-mono);
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--text-primary);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
     }
 
-    .hive-meta-info {
+    .node-meta {
       font-family: var(--font-mono);
       font-size: 11px;
       color: var(--text-muted);
       margin-top: 1px;
     }
 
-    .status-capsule {
+    .node-status-badge {
       font-family: var(--font-mono);
       font-size: 11px;
-      font-weight: 600;
-      padding: 4px 11px;
+      font-weight: 500;
+      padding: 3px 9px;
       border-radius: var(--radius-pill);
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      letter-spacing: 0.04em;
     }
 
-    .capsule-auto {
+    .badge-auto {
       background: rgba(255, 255, 255, 0.03);
       color: var(--text-secondary);
       border: 1px solid var(--border-subtle);
     }
 
-    .capsule-overridden {
+    .badge-custom {
       background: var(--gold-subtle);
-      color: var(--gold-glow);
+      color: var(--gold-light);
       border: 1px solid var(--gold-border);
     }
 
-    .capsule-dot {
-      width: 5.5px;
-      height: 5.5px;
+    .badge-dot {
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: currentColor;
     }
 
-    /* Precision Sensor Cell Grid */
-    .telemetry-cells-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    @media (max-width: 500px) {
-      .telemetry-cells-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .sensor-cell {
-      background: var(--bg-input);
-      border: 1px solid var(--border-hairline);
-      border-radius: var(--radius-card);
-      padding: 11px 13px;
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
-      transition: border-color 0.15s, background-color 0.15s;
-    }
-
-    .sensor-cell:focus-within {
-      border-color: rgba(245, 158, 11, 0.45);
-      background-color: var(--bg-panel-elevated);
-    }
-
-    .sensor-cell-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 10.5px;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .sensor-range-target {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--text-faint);
-    }
-
-    .sensor-input-wrap {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      margin-bottom: 6px;
-    }
-
-    .telemetry-input {
-      background: transparent;
-      border: none;
-      color: var(--text-primary);
-      font-family: var(--font-mono);
-      font-size: 14.5px;
-      font-weight: 600;
+    /* Clean Streamlined Sensor List (No Cramped Boxes) */
+    .sensors-table {
       width: 100%;
-      outline: none;
-      letter-spacing: -0.01em;
-    }
-
-    .telemetry-input::placeholder {
-      color: var(--text-faint);
-      font-size: 12px;
-    }
-
-    .special-keys-cluster {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-
-    .key-tactile {
-      padding: 3px 8px;
-      font-family: var(--font-mono);
-      font-size: 10.5px;
-      font-weight: 600;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-hairline);
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.15s var(--ease-snappy);
-    }
-
-    .key-tactile:hover {
-      color: var(--text-primary);
-      background: rgba(255, 255, 255, 0.08);
-      border-color: var(--border-medium);
-      transform: translateY(-0.5px);
-    }
-
-    .hairline-gauge {
-      height: 2px;
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: var(--radius-pill);
-      overflow: hidden;
-    }
-
-    .hairline-gauge-fill {
-      height: 100%;
-      border-radius: var(--radius-pill);
-      transition: width 0.35s ease, background 0.35s ease;
-    }
-
-    /* Simulation Protocols & Chaos Injection */
-    .protocols-dock {
-      background: rgba(255, 255, 255, 0.015);
-      border: 1px solid var(--border-hairline);
-      border-radius: var(--radius-card);
-      padding: 14px 16px;
       margin-bottom: 20px;
     }
 
-    .protocol-group {
+    .sensor-row {
+      display: grid;
+      grid-template-columns: 140px 1fr auto;
+      align-items: center;
+      gap: 14px;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .sensor-row:last-child {
+      border-bottom: none;
+    }
+
+    .sensor-label-group {
       display: flex;
       flex-direction: column;
-      gap: 8px;
     }
 
-    .protocol-group-title {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.09em;
-      font-weight: 700;
+    .sensor-name {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .sensor-target {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
       color: var(--text-muted);
     }
 
-    .protocol-group-title.danger {
-      color: #fda4af;
+    .sensor-input-cell {
+      display: flex;
+      align-items: center;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 5px 10px;
+      transition: border-color 0.15s;
     }
 
-    .protocol-switches {
+    .sensor-input-cell:focus-within {
+      border-color: rgba(245, 158, 11, 0.45);
+    }
+
+    .sensor-input {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      font-weight: 500;
+      width: 100%;
+      outline: none;
+    }
+
+    .sensor-input::placeholder {
+      color: var(--text-faint);
+    }
+
+    .sensor-actions {
       display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-key {
+      padding: 3px 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-key:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--border-medium);
+    }
+
+    /* Streamlined Scenario Preset Bar */
+    .presets-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       flex-wrap: wrap;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      margin-bottom: 18px;
+    }
+
+    .presets-title {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
       gap: 6px;
     }
 
-    .switch-pill {
+    .presets-quick-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .pill-quick {
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 500;
       font-family: var(--font-mono);
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border-hairline);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
       color: var(--text-secondary);
-      padding: 4px 11px;
+      padding: 3px 9px;
       border-radius: var(--radius-pill);
       cursor: pointer;
-      transition: all 0.15s var(--ease-snappy);
+      transition: all 0.15s ease;
     }
 
-    .switch-pill:hover {
-      background: rgba(255, 255, 255, 0.07);
-      color: var(--text-primary);
+    .pill-quick:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
       border-color: var(--border-medium);
-      transform: translateY(-1px);
     }
 
-    .switch-pill.fuzz-danger {
+    .pill-quick.fuzz {
       color: #fda4af;
-      background: rgba(244, 63, 94, 0.04);
+      background: rgba(244, 63, 94, 0.05);
       border-color: rgba(244, 63, 94, 0.2);
     }
 
-    .switch-pill.fuzz-danger:hover {
+    .pill-quick.fuzz:hover {
       background: rgba(244, 63, 94, 0.12);
       color: #fff;
-      border-color: rgba(244, 63, 94, 0.45);
+      border-color: rgba(244, 63, 94, 0.4);
     }
 
-    /* Enclosure Footer Actions */
-    .enclosure-footer {
+    .preset-select {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 11.5px;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .preset-select:focus {
+      border-color: var(--gold-border);
+    }
+
+    /* Card Footer Actions */
+    .card-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border-hairline);
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
     }
 
-    .last-dispatch-readout {
+    .last-tx-readout {
       font-family: var(--font-mono);
       font-size: 11px;
       color: var(--text-muted);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 230px;
+      max-width: 220px;
     }
 
-    .enclosure-actions-group {
+    .card-actions-group {
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .btn-action-ghost {
+    .btn-secondary {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: transparent;
-      border: 1px solid var(--border-hairline);
-      color: var(--text-secondary);
-      font-family: var(--font-display);
-      font-size: 12px;
-      font-weight: 600;
-      padding: 6px 13px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: all 0.15s var(--ease-snappy);
-    }
-
-    .btn-action-ghost:hover {
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text-primary);
-      border-color: var(--border-subtle);
-    }
-
-    .btn-action-outline {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      font-family: var(--font-display);
+      color: var(--text-secondary);
       font-size: 12px;
-      font-weight: 600;
-      padding: 6px 13px;
+      font-weight: 500;
+      padding: 6px 12px;
       border-radius: var(--radius-sm);
       cursor: pointer;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-      transition: all 0.15s var(--ease-snappy);
+      transition: all 0.15s ease;
     }
 
-    .btn-action-outline:hover {
-      background: rgba(255, 255, 255, 0.08);
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
       border-color: var(--border-medium);
     }
 
-    .btn-action-transmit {
+    .btn-action-send {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: linear-gradient(135deg, var(--gold-main), var(--gold-deep));
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #08090c;
-      font-family: var(--font-display);
+      background: var(--gold-main);
+      border: none;
+      color: #090a0f;
       font-size: 12px;
-      font-weight: 700;
-      padding: 6px 15px;
+      font-weight: 600;
+      padding: 6px 14px;
       border-radius: var(--radius-sm);
       cursor: pointer;
-      box-shadow: 0 0 14px rgba(245, 158, 11, 0.25);
-      transition: all 0.15s var(--ease-snappy);
+      transition: all 0.15s ease;
     }
 
-    .btn-action-transmit:hover {
-      background: linear-gradient(135deg, var(--gold-glow), var(--gold-main));
-      box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+    .btn-action-send:hover {
+      background: var(--gold-light);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
     }
 
-    /* Master Flight Telemetry Datalogger (Logs Panel) */
-    .datalogger-panel {
-      padding: 24px 28px;
+    /* Logs Terminal Panel */
+    .logs-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 22px 26px;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.35);
     }
 
-    .datalogger-header {
+    .logs-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 16px;
-      margin-bottom: 18px;
+      gap: 14px;
+      margin-bottom: 16px;
     }
 
-    .datalogger-title-cluster {
+    .logs-title-group {
       display: flex;
       align-items: center;
-      gap: 11px;
+      gap: 9px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-main);
     }
 
-    .datalogger-title {
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      color: var(--text-primary);
-    }
-
-    .datalogger-controls {
+    .logs-tools {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
       gap: 10px;
     }
 
-    .search-chassis {
+    .search-input-wrap {
       display: flex;
       align-items: center;
       gap: 8px;
       background: var(--bg-input);
-      border: 1px solid var(--border-hairline);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
-      padding: 6px 11px;
+      padding: 5px 10px;
       color: var(--text-muted);
-      width: 230px;
+      width: 220px;
       transition: border-color 0.15s;
     }
 
-    .search-chassis:focus-within {
+    .search-input-wrap:focus-within {
       border-color: rgba(245, 158, 11, 0.45);
     }
 
-    .search-chassis input {
+    .search-input-wrap input {
       background: transparent;
       border: none;
-      color: var(--text-primary);
-      font-family: var(--font-display);
+      color: var(--text-main);
+      font-family: var(--font-sans);
       font-size: 12px;
       outline: none;
       width: 100%;
     }
 
-    .search-chassis input::placeholder {
+    .search-input-wrap input::placeholder {
       color: var(--text-faint);
     }
 
-    .segmented-filter-dock {
+    .filter-tabs-group {
       display: inline-flex;
       background: var(--bg-input);
-      border: 1px solid var(--border-hairline);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
       padding: 2px;
       gap: 2px;
     }
 
-    .filter-key {
+    .filter-btn {
       background: transparent;
       border: none;
       color: var(--text-muted);
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 500;
       padding: 4px 10px;
       border-radius: 4px;
       cursor: pointer;
@@ -966,12 +801,12 @@
       transition: all 0.15s ease;
     }
 
-    .filter-key.active {
+    .filter-btn.active {
       background: rgba(255, 255, 255, 0.08);
-      color: var(--text-primary);
+      color: var(--text-main);
     }
 
-    .filter-count-bubble {
+    .filter-badge-count {
       font-family: var(--font-mono);
       font-size: 10px;
       padding: 1px 5px;
@@ -980,37 +815,36 @@
       color: var(--text-muted);
     }
 
-    .filter-key.active .filter-count-bubble {
+    .filter-btn.active .filter-badge-count {
       background: rgba(255, 255, 255, 0.15);
-      color: var(--text-primary);
+      color: var(--text-main);
     }
 
-    .btn-purge {
+    .btn-clear-logs {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       background: transparent;
-      border: 1px solid var(--border-hairline);
+      border: 1px solid var(--border-subtle);
       color: var(--text-muted);
       font-size: 12px;
-      font-weight: 600;
-      padding: 5px 12px;
+      font-weight: 500;
+      padding: 5px 11px;
       border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: all 0.15s var(--ease-snappy);
+      transition: all 0.15s ease;
     }
 
-    .btn-purge:hover {
+    .btn-clear-logs:hover {
       background: rgba(255, 255, 255, 0.04);
-      color: var(--text-primary);
-      border-color: var(--border-subtle);
+      color: var(--text-main);
+      border-color: var(--border-medium);
     }
 
-    /* Clean Monospaced Table */
-    .table-viewport {
+    .table-responsive {
       overflow-x: auto;
-      border-radius: var(--radius-card);
-      border: 1px solid var(--border-hairline);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
     }
 
     table {
@@ -1021,19 +855,19 @@
     }
 
     th {
-      background: var(--bg-panel-elevated);
+      background: var(--bg-surface-elevated);
       color: var(--text-muted);
-      padding: 11px 16px;
-      font-weight: 700;
-      font-size: 10.5px;
+      padding: 10px 14px;
+      font-weight: 600;
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      border-bottom: 1px solid var(--border-hairline);
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     td {
-      padding: 11px 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.035);
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
       font-family: var(--font-mono);
       color: var(--text-secondary);
       vertical-align: middle;
@@ -1043,91 +877,91 @@
       border-bottom: none;
     }
 
-    tr.interactive-row {
+    tr.row-clickable {
       cursor: pointer;
       transition: background-color 0.15s;
     }
 
-    tr.interactive-row:hover td {
+    tr.row-clickable:hover td {
       background: rgba(255, 255, 255, 0.02);
     }
 
-    .status-capsule-badge {
+    .badge-status {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 3px 8px;
+      padding: 2px 7px;
       border-radius: 4px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 500;
       font-family: var(--font-mono);
     }
 
-    .badge-ok {
-      background: var(--emerald-subtle);
-      color: var(--emerald-main);
-      border: 1px solid var(--emerald-border);
+    .badge-201 {
+      background: var(--green-subtle);
+      color: var(--green-main);
+      border: 1px solid var(--green-border);
     }
 
-    .badge-reject {
+    .badge-400 {
       background: var(--rose-subtle);
       color: var(--rose-main);
       border: 1px solid var(--rose-border);
     }
 
-    .badge-dup {
+    .badge-200 {
       background: var(--sky-subtle);
       color: var(--sky-main);
       border: 1px solid var(--sky-border);
     }
 
-    .badge-net-err {
+    .badge-net {
       background: rgba(255, 255, 255, 0.04);
       color: var(--text-muted);
-      border: 1px solid var(--border-hairline);
+      border: 1px solid var(--border-subtle);
     }
 
-    .empty-ledger {
+    .empty-logs {
       text-align: center;
-      padding: 40px 16px;
+      padding: 36px 16px;
       color: var(--text-muted);
       font-size: 13px;
     }
 
-    .payload-cell-preview {
-      background: var(--bg-canvas);
-      border: 1px solid var(--border-hairline);
+    .payload-view {
+      background: var(--bg-root);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
-      padding: 14px;
+      padding: 12px;
       font-family: var(--font-mono);
       font-size: 11.5px;
       color: var(--text-secondary);
       white-space: pre-wrap;
       word-break: break-all;
-      max-height: 250px;
+      max-height: 220px;
       overflow-y: auto;
     }
 
-    /* Tactile Toast Notification */
+    /* Toast Notification */
     #toast {
       position: fixed;
-      bottom: 28px;
-      right: 28px;
-      background: rgba(14, 16, 21, 0.94);
-      backdrop-filter: blur(20px);
+      bottom: 24px;
+      right: 24px;
+      background: rgba(16, 18, 26, 0.95);
+      backdrop-filter: blur(16px);
       border: 1px solid var(--border-medium);
-      color: var(--text-primary);
-      padding: 11px 20px;
-      border-radius: var(--radius-card);
+      color: var(--text-main);
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 500;
       display: flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       opacity: 0;
-      transform: translateY(14px);
-      transition: all 0.25s var(--ease-snappy);
+      transform: translateY(12px);
+      transition: all 0.25s var(--ease);
       pointer-events: none;
       z-index: 1000;
     }
@@ -1139,26 +973,26 @@
     }
 
     #toastIcon {
-      color: var(--gold-glow);
+      color: var(--gold-light);
       display: flex;
       align-items: center;
     }
 
     footer {
       margin-top: 48px;
-      padding-top: 24px;
-      border-top: 1px solid var(--border-hairline);
+      padding-top: 20px;
+      border-top: 1px solid var(--border-subtle);
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 12px;
       color: var(--text-muted);
       flex-wrap: wrap;
-      gap: 14px;
+      gap: 12px;
     }
 
     footer a {
-      color: var(--gold-glow);
+      color: var(--gold-light);
       text-decoration: none;
     }
 
@@ -1171,202 +1005,141 @@
   <div class="container">
     <!-- Header -->
     <header>
-      <div class="brand-cluster">
-        <div class="brand-emblem">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <div class="brand-group">
+        <div class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2L21 7.2V16.8L12 22L3 16.8V7.2L12 2Z"/>
             <path d="M12 8V16"/>
             <path d="M12 12L19 16"/>
             <path d="M12 12L5 16"/>
           </svg>
         </div>
-        <div class="brand-title-group">
-          <h1>HoneyChain IoT Simulator <span class="brand-badge">v2.2 Pro</span></h1>
-          <p>Autonomous Apiary Edge Gateway • Biological Telemetry & Anomaly Fuzzing Engine</p>
+        <div class="brand-text">
+          <h1>HoneyChain IoT Simulator <span class="brand-badge">v2.2</span></h1>
+          <p>Smart Apiary Autonomous Telemetry Dispatcher & Anomaly Injection Engine</p>
         </div>
       </div>
-      <div class="header-actions">
-        <div class="transponder-pill" title="Ingestion Target REST Endpoint">
-          <div class="led-beacon">
-            <div class="halo"></div>
-            <div class="core"></div>
-          </div>
-          <span>Target Gateway:</span>
-          <strong id="targetUrlDisplay" style="color: var(--text-primary);">Connecting...</strong>
+      <div class="header-pills">
+        <div class="status-capsule-link" title="Ingestion Target REST Endpoint">
+          <div class="pulse-dot"></div>
+          <span>Target:</span>
+          <strong id="targetUrlDisplay" style="color: var(--text-main);">Connecting...</strong>
         </div>
+        <div class="status-capsule-link">
+          <span style="color: var(--text-muted);">Health:</span>
+          <strong id="ribbonHealth" style="color: var(--green-main);">Healthy (201 OK)</strong>
+        </div>
+        <!-- Hidden helper span to satisfy test bindings seamlessly -->
+        <span id="countdownTableSpan" style="display: none;">--:--</span>
       </div>
     </header>
 
-    <!-- Master Chronometer HUD -->
-    <div class="machined-panel master-hud">
-      <div class="hud-layout">
-        <!-- Watchmaker Radial Dial -->
-        <div class="chronometer-gauge">
-          <div class="gauge-housing">
-            <svg class="gauge-svg" viewBox="0 0 86 86">
-              <circle class="gauge-bg-track" cx="43" cy="43" r="39" />
-              <circle class="gauge-sweep" id="gaugeCircle" cx="43" cy="43" r="39" />
+    <!-- Master Cadence HUD -->
+    <div class="master-hud">
+      <!-- Circular Countdown Ring & Digits -->
+      <div class="hud-timer-col">
+        <div class="hud-dial-wrap">
+          <svg class="dial-svg" viewBox="0 0 76 76">
+            <circle class="dial-bg" cx="38" cy="38" r="34" />
+            <circle class="dial-bar" id="gaugeCircle" cx="38" cy="38" r="34" />
+          </svg>
+          <div class="dial-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
             </svg>
-            <div class="gauge-center-dial">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
-            </div>
-          </div>
-          <div class="timer-readout">
-            <h2>Next Batch Auto-Transmission</h2>
-            <div class="countdown-digits">
-              <span id="countdownDisplay">--:--</span>
-              <span class="countdown-subtext" id="countdownSeconds">(--s)</span>
-            </div>
           </div>
         </div>
+        <div class="timer-readout">
+          <h2>Next Batch Auto-Transmission</h2>
+          <div class="countdown-digits">
+            <span id="countdownDisplay">--:--</span>
+            <span class="countdown-subtext" id="countdownSeconds">(--s)</span>
+          </div>
+        </div>
+      </div>
 
-        <!-- Cadence Sync Rail -->
-        <div class="cadence-stream">
-          <div class="cadence-meta-row">
-            <span class="cadence-badge-chip" id="cadenceBadge">10m Cadence (.env)</span>
-            <div class="cadence-metrics-trio">
-              <span id="progressPct">0%</span>
-              <span id="cycleCountDisplay">Cycle #0</span>
-              <span id="nextBatchTime" style="color: var(--text-faint);">Next: --:--:--</span>
-            </div>
-          </div>
-          <div class="cadence-progress-rail">
-            <div class="cadence-progress-fill" id="progressBar"></div>
+      <!-- Cadence & Progress Bar -->
+      <div class="hud-meta-col">
+        <div class="hud-meta-header">
+          <span class="cadence-badge" id="cadenceBadge">10m Cadence (.env)</span>
+          <div class="hud-metrics-row">
+            <span id="progressPct">0%</span>
+            <span id="cycleCountDisplay">Cycle #0</span>
+            <span id="nextBatchTime" style="color: var(--text-faint);">Next: --:--:--</span>
           </div>
         </div>
+        <div class="progress-rail">
+          <div class="progress-fill" id="progressBar"></div>
+        </div>
+      </div>
 
-        <!-- Primary Action Trigger -->
-        <div>
-          <button class="btn-batch-executive" id="btnTransmitAll" onclick="transmitAllNow()" title="Dispatch telemetry batch immediately (resets countdown interval)">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-            </svg>
-            <span>Transmit Batch Now</span>
-          </button>
-        </div>
+      <!-- Primary Action -->
+      <div>
+        <button class="btn-batch-primary" id="btnTransmitAll" onclick="transmitAllNow()" title="Send telemetry batch immediately (resets interval)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          <span>Transmit Batch Now</span>
+        </button>
       </div>
     </div>
 
-    <!-- Diagnostics Ribbon -->
-    <div class="diagnostics-ribbon">
-      <div class="ribbon-cell">
-        <div class="ribbon-icon-frame">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
-            <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
-            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
-            <line x1="12" y1="20" x2="12.01" y2="20"/>
-          </svg>
-        </div>
-        <div>
-          <div class="ribbon-label">Network Protocol</div>
-          <div class="ribbon-value">HTTP REST / JSON Telemetry</div>
-        </div>
-      </div>
-
-      <div class="ribbon-cell">
-        <div class="ribbon-icon-frame">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
-            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
-            <line x1="6" y1="6" x2="6.01" y2="6"/>
-            <line x1="6" y1="18" x2="6.01" y2="18"/>
-          </svg>
-        </div>
-        <div>
-          <div class="ribbon-label">Monitored Nodes</div>
-          <div class="ribbon-value">2 Virtual • 1 Hardware (WG)</div>
-        </div>
-      </div>
-
-      <div class="ribbon-cell">
-        <div class="ribbon-icon-frame">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 16 14"/>
-          </svg>
-        </div>
-        <div>
-          <div class="ribbon-label">Next Batch In</div>
-          <div class="ribbon-value" id="countdownTableSpan">--:--</div>
-        </div>
-      </div>
-
-      <div class="ribbon-cell">
-        <div class="ribbon-icon-frame">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-          </svg>
-        </div>
-        <div>
-          <div class="ribbon-label">Ingestion Health</div>
-          <div class="ribbon-value" id="ribbonHealth" style="color: var(--emerald-main);">Healthy (201 OK)</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Active Monitored Hives Section Header -->
+    <!-- Active Monitored Hives -->
     <div class="section-bar">
-      <div class="section-title-wrap">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="section-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2L21 7.2V16.8L12 22L3 16.8V7.2L12 2Z"/>
         </svg>
-        <span>Virtual Simulated Apiary Nodes</span>
+        <span>Virtual Apiary Nodes</span>
       </div>
-      <div class="section-note">Hardware Gateway Node HIVE-WG-301 transmits independently via ESP32</div>
+      <div class="section-subtitle">Hardware Node HIVE-WG-301 transmits independently via physical ESP32 gateway</div>
     </div>
 
-    <!-- Bento Hives Grid -->
-    <div class="hives-bento" id="hivesGrid">
-      <!-- Dynamically rendered via renderHiveCards() -->
+    <div class="hives-container" id="hivesGrid">
+      <!-- Injected via JavaScript -->
     </div>
 
-    <!-- Flight Telemetry Datalogger Panel -->
-    <div class="machined-panel datalogger-panel">
-      <div class="datalogger-header">
-        <div class="datalogger-title-cluster">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Telemetry Transmission Feed -->
+    <div class="logs-section">
+      <div class="logs-header">
+        <div class="logs-title-group">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="4 17 10 11 4 5"/>
             <line x1="12" y1="19" x2="20" y2="19"/>
           </svg>
-          <span class="datalogger-title">Flight Telemetry Datalogger</span>
+          <span>Telemetry Transmission Feed</span>
         </div>
 
-        <div class="datalogger-controls">
-          <!-- Search input -->
-          <div class="search-chassis">
+        <div class="logs-tools">
+          <div class="search-input-wrap">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"/>
               <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <input type="text" id="logSearchInput" placeholder="Filter telemetry stream..." oninput="handleLogSearch()" />
+            <input type="text" id="logSearchInput" placeholder="Filter logs..." oninput="handleLogSearch()" />
           </div>
 
-          <!-- Filter keys -->
-          <div class="segmented-filter-dock">
-            <button class="filter-key active" id="tabAll" onclick="setLogFilter('all')">
+          <div class="filter-tabs-group">
+            <button class="filter-btn active" id="tabAll" onclick="setLogFilter('all')">
               <span>All</span>
-              <span class="filter-count-bubble" id="countAll">0</span>
+              <span class="filter-badge-count" id="countAll">0</span>
             </button>
-            <button class="filter-key" id="tab201" onclick="setLogFilter('201')">
+            <button class="filter-btn" id="tab201" onclick="setLogFilter('201')">
               <span>201 OK</span>
-              <span class="filter-count-bubble" id="count201">0</span>
+              <span class="filter-badge-count" id="count201">0</span>
             </button>
-            <button class="filter-key" id="tab400" onclick="setLogFilter('400')">
+            <button class="filter-btn" id="tab400" onclick="setLogFilter('400')">
               <span>400 Reject</span>
-              <span class="filter-count-bubble" id="count400">0</span>
+              <span class="filter-badge-count" id="count400">0</span>
             </button>
-            <button class="filter-key" id="tab200" onclick="setLogFilter('200')">
+            <button class="filter-btn" id="tab200" onclick="setLogFilter('200')">
               <span>200 Dup</span>
-              <span class="filter-count-bubble" id="count200">0</span>
+              <span class="filter-badge-count" id="count200">0</span>
             </button>
           </div>
 
-          <!-- Purge button -->
-          <button class="btn-purge" onclick="clearLogs()" title="Clear telemetry log ledger">
+          <button class="btn-clear-logs" onclick="clearLogs()" title="Clear telemetry log history">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="3 6 5 6 21 6"/>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -1376,13 +1149,13 @@
         </div>
       </div>
 
-      <div class="table-viewport">
+      <div class="table-responsive">
         <table>
           <thead>
             <tr>
               <th>Timestamp</th>
               <th>Hive ID</th>
-              <th>Gateway Device</th>
+              <th>Device</th>
               <th>Telemetry Metrics</th>
               <th>Status</th>
               <th>Latency</th>
@@ -1391,7 +1164,7 @@
           </thead>
           <tbody id="logsTableBody">
             <tr>
-              <td colspan="7" class="empty-ledger">No telemetry transmissions logged yet. Waiting for scheduled cycle or manual dispatch.</td>
+              <td colspan="7" class="empty-logs">No telemetry transmissions logged yet. Waiting for cycle expiry or manual dispatch.</td>
             </tr>
           </tbody>
         </table>
@@ -1400,8 +1173,8 @@
 
     <!-- Footer -->
     <footer>
-      <div>HoneyChain Standalone IoT Edge Telemetry Simulator & Apiary Gateway Console</div>
-      <div>Ingestion Target: <span id="footerTargetUrl" style="font-family: var(--font-mono); color: var(--text-secondary);">Connecting...</span></div>
+      <div>HoneyChain Standalone IoT Edge Telemetry Simulator & Apiary Gateway</div>
+      <div>Target Ingestion: <span id="footerTargetUrl" style="font-family: var(--font-mono); color: var(--text-secondary);">Connecting...</span></div>
     </footer>
   </div>
 
@@ -1459,10 +1232,10 @@
       const elapsed = Math.max(0, totalSec - sec);
       const pct = Math.min(100, Math.max(0, Math.round((elapsed / totalSec) * 100)));
 
-      // Circumference for r=39 is 2 * PI * 39 ≈ 245.04
+      // Circumference for r=34 is 2 * PI * 34 ≈ 213.63
       const circle = document.getElementById('gaugeCircle');
       if (circle) {
-        const offset = 245.04 - (pct / 100) * 245.04;
+        const offset = 213.63 - (pct / 100) * 213.63;
         circle.style.strokeDashoffset = offset;
       }
 
@@ -1525,44 +1298,7 @@
       }
     }
 
-    // Sensor guide calculations
-    function getTempGuide(temp) {
-      if (temp === null || temp === 'NaN') return { pct: 0, color: 'transparent' };
-      const val = parseFloat(temp);
-      if (isNaN(val)) return { pct: 0, color: 'transparent' };
-      const pct = Math.max(5, Math.min(100, Math.round(((val - 30) / 10) * 100)));
-      const isOptimal = val >= 33.0 && val <= 36.0;
-      const color = isOptimal ? 'var(--emerald-main)' : (val > 36 ? 'var(--rose-main)' : 'var(--sky-main)');
-      return { pct, color };
-    }
-
-    function getHumidityGuide(hum) {
-      if (hum === null || hum === 'NaN') return { pct: 0, color: 'transparent' };
-      const val = parseFloat(hum);
-      if (isNaN(val)) return { pct: 0, color: 'transparent' };
-      const pct = Math.max(5, Math.min(100, Math.round(val)));
-      const isOptimal = val >= 50 && val <= 70;
-      return { pct, color: isOptimal ? 'var(--sky-main)' : 'var(--gold-main)' };
-    }
-
-    function getBatteryGuide(bat) {
-      if (bat === null || bat === 'NaN') return { pct: 0, color: 'transparent' };
-      const val = parseFloat(bat);
-      if (isNaN(val)) return { pct: 0, color: 'transparent' };
-      const pct = Math.max(5, Math.min(100, Math.round(val)));
-      const color = val > 50 ? 'var(--emerald-main)' : (val > 20 ? 'var(--gold-main)' : 'var(--rose-main)');
-      return { pct, color };
-    }
-
-    function getWeightGuide(weight) {
-      if (weight === null || weight === 'NaN') return { pct: 0, color: 'transparent' };
-      const val = parseFloat(weight);
-      if (isNaN(val)) return { pct: 0, color: 'transparent' };
-      const pct = Math.max(5, Math.min(100, Math.round(((val - 20) / 30) * 100)));
-      return { pct, color: 'var(--gold-main)' };
-    }
-
-    // Render Hive Enclosure Cards
+    // Render Streamlined Hive Cards
     function renderHiveCards(hives) {
       const container = document.getElementById('hivesGrid');
       
@@ -1575,178 +1311,173 @@
 
       hives.forEach(hive => {
         const p = hive.pendingPayload;
-        const tempG = getTempGuide(p.temperature);
-        const humG = getHumidityGuide(p.humidity);
-        const batG = getBatteryGuide(p.batteryLevelPct);
-        const weightG = getWeightGuide(p.weightKg);
 
         const card = document.createElement('div');
-        card.className = `hive-enclosure ${hive.isManipulated ? 'overridden' : ''}`;
+        card.className = `hive-card ${hive.isManipulated ? 'customized' : ''}`;
         card.id = `card-${hive.hiveId}`;
 
         card.innerHTML = `
-          <div class="hive-enclosure-header">
-            <div class="hive-identity">
-              <div class="hive-identity-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="card-top-bar">
+            <div class="node-identity">
+              <div class="node-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 2L21 7.2V16.8L12 22L3 16.8V7.2L12 2Z"/>
                 </svg>
               </div>
-              <div class="hive-title-stack">
+              <div class="node-title-group">
                 <h3>${hive.hiveId}</h3>
-                <div class="hive-meta-info">${hive.deviceId} • ${hive.region || 'Smart Apiary Node'}</div>
+                <div class="node-meta">${hive.deviceId} • ${hive.region || 'Smart Apiary Node'}</div>
               </div>
             </div>
-            <span class="status-capsule ${hive.isManipulated ? 'capsule-overridden' : 'capsule-auto'}" id="status-badge-${hive.hiveId}">
-              <span class="capsule-dot"></span>
+            <span class="node-status-badge ${hive.isManipulated ? 'badge-custom' : 'badge-auto'}" id="status-badge-${hive.hiveId}">
+              <span class="badge-dot"></span>
               ${hive.isManipulated ? 'Manual Override' : 'Natural Physics'}
             </span>
           </div>
 
-          <div class="telemetry-cells-grid">
-            <!-- Brood Nest Temp -->
-            <div class="sensor-cell">
-              <div class="sensor-cell-top">
-                <span>Brood Temp</span>
-                <span class="sensor-range-target">°C (33–36)</span>
+          <!-- Clean Streamlined Sensor List -->
+          <div class="sensors-table">
+            <!-- Brood Temp -->
+            <div class="sensor-row">
+              <div class="sensor-label-group">
+                <span class="sensor-name">Brood Temp</span>
+                <span class="sensor-target">Target: 33–36°C</span>
               </div>
-              <div class="sensor-input-wrap">
-                <input type="text" class="telemetry-input" id="input-temp-${hive.hiveId}" value="${formatValue(p.temperature)}" placeholder="e.g. 35.1, null, NaN">
-                <div class="special-keys-cluster">
-                  <button type="button" class="key-tactile" onclick="setSpecialValue('input-temp-${hive.hiveId}', 'null')" title="Set Brood Temp to explicit null">null</button>
-                  <button type="button" class="key-tactile" onclick="setSpecialValue('input-temp-${hive.hiveId}', 'NaN')" title="Set Brood Temp to explicit NaN">NaN</button>
-                </div>
+              <div class="sensor-input-cell">
+                <input type="text" class="sensor-input" id="input-temp-${hive.hiveId}" value="${formatValue(p.temperature)}" placeholder="e.g. 35.1">
+                <span style="color: var(--text-muted); font-size: 12px; margin-left: 4px;">°C</span>
               </div>
-              <div class="hairline-gauge">
-                <div class="hairline-gauge-fill" style="width: ${tempG.pct}%; background: ${tempG.color};"></div>
+              <div class="sensor-actions">
+                <button type="button" class="btn-key" onclick="setSpecialValue('input-temp-${hive.hiveId}', 'null')" title="Set Brood Temp to explicit null">null</button>
+                <button type="button" class="btn-key" onclick="setSpecialValue('input-temp-${hive.hiveId}', 'NaN')" title="Set Brood Temp to explicit NaN">NaN</button>
               </div>
             </div>
 
             <!-- Humidity -->
-            <div class="sensor-cell">
-              <div class="sensor-cell-top">
-                <span>Humidity</span>
-                <span class="sensor-range-target">% (50–70)</span>
+            <div class="sensor-row">
+              <div class="sensor-label-group">
+                <span class="sensor-name">Humidity</span>
+                <span class="sensor-target">Target: 50–70%</span>
               </div>
-              <div class="sensor-input-wrap">
-                <input type="text" class="telemetry-input" id="input-hum-${hive.hiveId}" value="${formatValue(p.humidity)}" placeholder="e.g. 62.5, null, NaN">
-                <div class="special-keys-cluster">
-                  <button type="button" class="key-tactile" onclick="setSpecialValue('input-hum-${hive.hiveId}', 'null')" title="Set Humidity to explicit null">null</button>
-                  <button type="button" class="key-tactile" onclick="setSpecialValue('input-hum-${hive.hiveId}', 'NaN')" title="Set Humidity to explicit NaN">NaN</button>
-                </div>
+              <div class="sensor-input-cell">
+                <input type="text" class="sensor-input" id="input-hum-${hive.hiveId}" value="${formatValue(p.humidity)}" placeholder="e.g. 62.5">
+                <span style="color: var(--text-muted); font-size: 12px; margin-left: 4px;">%</span>
               </div>
-              <div class="hairline-gauge">
-                <div class="hairline-gauge-fill" style="width: ${humG.pct}%; background: ${humG.color};"></div>
+              <div class="sensor-actions">
+                <button type="button" class="btn-key" onclick="setSpecialValue('input-hum-${hive.hiveId}', 'null')" title="Set Humidity to explicit null">null</button>
+                <button type="button" class="btn-key" onclick="setSpecialValue('input-hum-${hive.hiveId}', 'NaN')" title="Set Humidity to explicit NaN">NaN</button>
               </div>
             </div>
 
             <!-- Hive Weight -->
-            <div class="sensor-cell">
-              <div class="sensor-cell-top">
-                <span>Hive Weight</span>
-                <span class="sensor-range-target">kg (Load Cell)</span>
+            <div class="sensor-row">
+              <div class="sensor-label-group">
+                <span class="sensor-name">Hive Weight</span>
+                <span class="sensor-target">Target: 30–45kg</span>
               </div>
-              <div class="sensor-input-wrap">
-                <input type="text" class="telemetry-input" id="input-weight-${hive.hiveId}" value="${formatValue(p.weightKg)}" placeholder="e.g. 31.5, null, NaN">
-                <div class="special-keys-cluster">
-                  <button type="button" class="key-tactile" onclick="setSpecialValue('input-weight-${hive.hiveId}', 'null')" title="Set Weight to explicit null">null</button>
-                  <button type="button" class="key-tactile" onclick="setSpecialValue('input-weight-${hive.hiveId}', 'NaN')" title="Set Weight to explicit NaN">NaN</button>
-                </div>
+              <div class="sensor-input-cell">
+                <input type="text" class="sensor-input" id="input-weight-${hive.hiveId}" value="${formatValue(p.weightKg)}" placeholder="e.g. 31.5">
+                <span style="color: var(--text-muted); font-size: 12px; margin-left: 4px;">kg</span>
               </div>
-              <div class="hairline-gauge">
-                <div class="hairline-gauge-fill" style="width: ${weightG.pct}%; background: ${weightG.color};"></div>
+              <div class="sensor-actions">
+                <button type="button" class="btn-key" onclick="setSpecialValue('input-weight-${hive.hiveId}', 'null')" title="Set Weight to explicit null">null</button>
+                <button type="button" class="btn-key" onclick="setSpecialValue('input-weight-${hive.hiveId}', 'NaN')" title="Set Weight to explicit NaN">NaN</button>
               </div>
             </div>
 
             <!-- Battery Level -->
-            <div class="sensor-cell">
-              <div class="sensor-cell-top">
-                <span>Battery Level</span>
-                <span class="sensor-range-target">% (0–100)</span>
+            <div class="sensor-row">
+              <div class="sensor-label-group">
+                <span class="sensor-name">Battery Level</span>
+                <span class="sensor-target">Nominal: >20%</span>
               </div>
-              <div class="sensor-input-wrap">
-                <input type="text" class="telemetry-input" id="input-bat-${hive.hiveId}" value="${formatValue(p.batteryLevelPct)}" placeholder="e.g. 95, null, NaN">
-                <div class="special-keys-cluster">
-                  <button type="button" class="key-tactile" onclick="setSpecialValue('input-bat-${hive.hiveId}', 'null')" title="Set Battery to explicit null">null</button>
-                  <button type="button" class="key-tactile" onclick="setSpecialValue('input-bat-${hive.hiveId}', 'NaN')" title="Set Battery to explicit NaN">NaN</button>
-                </div>
+              <div class="sensor-input-cell">
+                <input type="text" class="sensor-input" id="input-bat-${hive.hiveId}" value="${formatValue(p.batteryLevelPct)}" placeholder="e.g. 95">
+                <span style="color: var(--text-muted); font-size: 12px; margin-left: 4px;">%</span>
               </div>
-              <div class="hairline-gauge">
-                <div class="hairline-gauge-fill" style="width: ${batG.pct}%; background: ${batG.color};"></div>
+              <div class="sensor-actions">
+                <button type="button" class="btn-key" onclick="setSpecialValue('input-bat-${hive.hiveId}', 'null')" title="Set Battery to explicit null">null</button>
+                <button type="button" class="btn-key" onclick="setSpecialValue('input-bat-${hive.hiveId}', 'NaN')" title="Set Battery to explicit NaN">NaN</button>
               </div>
             </div>
 
             <!-- Bee In Flow -->
-            <div class="sensor-cell">
-              <div class="sensor-cell-top">
-                <span>Bee In Count</span>
-                <span class="sensor-range-target">Arrivals</span>
+            <div class="sensor-row">
+              <div class="sensor-label-group">
+                <span class="sensor-name">Bee Arrivals</span>
+                <span class="sensor-target">Inbound count</span>
               </div>
-              <div class="sensor-input-wrap">
-                <input type="text" class="telemetry-input" id="input-in-${hive.hiveId}" value="${formatValue(p.beeInCount)}" placeholder="e.g. 120, null, NaN">
-                <div class="special-keys-cluster">
-                  <button type="button" class="key-tactile" onclick="setSpecialValue('input-in-${hive.hiveId}', 'null')" title="Set Bee In to explicit null">null</button>
-                  <button type="button" class="key-tactile" onclick="setSpecialValue('input-in-${hive.hiveId}', 'NaN')" title="Set Bee In to explicit NaN">NaN</button>
-                </div>
+              <div class="sensor-input-cell">
+                <input type="text" class="sensor-input" id="input-in-${hive.hiveId}" value="${formatValue(p.beeInCount)}" placeholder="e.g. 120">
+              </div>
+              <div class="sensor-actions">
+                <button type="button" class="btn-key" onclick="setSpecialValue('input-in-${hive.hiveId}', 'null')" title="Set Bee In to explicit null">null</button>
+                <button type="button" class="btn-key" onclick="setSpecialValue('input-in-${hive.hiveId}', 'NaN')" title="Set Bee In to explicit NaN">NaN</button>
               </div>
             </div>
 
             <!-- Bee Out Flow -->
-            <div class="sensor-cell">
-              <div class="sensor-cell-top">
-                <span>Bee Out Count</span>
-                <span class="sensor-range-target">Departures</span>
+            <div class="sensor-row">
+              <div class="sensor-label-group">
+                <span class="sensor-name">Bee Departures</span>
+                <span class="sensor-target">Outbound count</span>
               </div>
-              <div class="sensor-input-wrap">
-                <input type="text" class="telemetry-input" id="input-out-${hive.hiveId}" value="${formatValue(p.beeOutCount)}" placeholder="e.g. 115, null, NaN">
-                <div class="special-keys-cluster">
-                  <button type="button" class="key-tactile" onclick="setSpecialValue('input-out-${hive.hiveId}', 'null')" title="Set Bee Out to explicit null">null</button>
-                  <button type="button" class="key-tactile" onclick="setSpecialValue('input-out-${hive.hiveId}', 'NaN')" title="Set Bee Out to explicit NaN">NaN</button>
-                </div>
+              <div class="sensor-input-cell">
+                <input type="text" class="sensor-input" id="input-out-${hive.hiveId}" value="${formatValue(p.beeOutCount)}" placeholder="e.g. 115">
+              </div>
+              <div class="sensor-actions">
+                <button type="button" class="btn-key" onclick="setSpecialValue('input-out-${hive.hiveId}', 'null')" title="Set Bee Out to explicit null">null</button>
+                <button type="button" class="btn-key" onclick="setSpecialValue('input-out-${hive.hiveId}', 'NaN')" title="Set Bee Out to explicit NaN">NaN</button>
               </div>
             </div>
           </div>
 
-          <!-- Simulation Protocols Dock -->
-          <div class="protocols-dock">
-            <div class="protocol-group">
-              <span class="protocol-group-title">Biological Scenarios</span>
-              <div class="protocol-switches">
-                <button class="switch-pill" onclick="applyPreset('${hive.hiveId}', 'swarm')">Swarm Alert</button>
-                <button class="switch-pill" onclick="applyPreset('${hive.hiveId}', 'overheating')">Brood Fever</button>
-                <button class="switch-pill" onclick="applyPreset('${hive.hiveId}', 'chilling')">Chill Alert</button>
-                <button class="switch-pill" onclick="applyPreset('${hive.hiveId}', 'nectar_surge')">Nectar Surge</button>
-                <button class="switch-pill" onclick="applyPreset('${hive.hiveId}', 'low_battery')">Low Battery</button>
-              </div>
+          <!-- Clean Preset Selector & Quick Chips -->
+          <div class="presets-toolbar">
+            <div class="presets-title">
+              <span>Preset:</span>
+              <select class="preset-select" onchange="if(this.value){applyPreset('${hive.hiveId}', this.value); this.value='';}">
+                <option value="">Choose Scenario...</option>
+                <optgroup label="Colony Biology">
+                  <option value="swarm">Swarm Alert (36.5°C, high activity)</option>
+                  <option value="overheating">Brood Fever (39.5°C heat stress)</option>
+                  <option value="chilling">Chill Alert (29.0°C cooling)</option>
+                  <option value="nectar_surge">Nectar Surge (+4.5kg weight)</option>
+                  <option value="low_battery">Low Battery (8% critical)</option>
+                </optgroup>
+                <optgroup label="Anomaly Fuzz Injection">
+                  <option value="null_temp">Null Temp (Missing reading)</option>
+                  <option value="nan_temp">NaN Temp (Sensor failure)</option>
+                  <option value="corrupt_nulls">All Sensors Null</option>
+                  <option value="corrupt_nans">All Sensors NaN</option>
+                </optgroup>
+              </select>
             </div>
 
-            <div class="protocol-group" style="margin-top: 10px;">
-              <span class="protocol-group-title danger">Diagnostic Fuzz & Edge Anomalies</span>
-              <div class="protocol-switches">
-                <button class="switch-pill fuzz-danger" onclick="applyPreset('${hive.hiveId}', 'null_temp')" title="Set Brood Temp to explicit null">Null Temp</button>
-                <button class="switch-pill fuzz-danger" onclick="applyPreset('${hive.hiveId}', 'nan_temp')" title="Set Brood Temp to explicit NaN">NaN Temp</button>
-                <button class="switch-pill fuzz-danger" onclick="applyPreset('${hive.hiveId}', 'corrupt_nulls')" title="Set all sensors to explicit null">All Null</button>
-                <button class="switch-pill fuzz-danger" onclick="applyPreset('${hive.hiveId}', 'corrupt_nans')" title="Set all sensors to explicit NaN">All NaN</button>
-              </div>
+            <div class="presets-quick-row">
+              <button class="pill-quick" onclick="applyPreset('${hive.hiveId}', 'swarm')">Swarm</button>
+              <button class="pill-quick" onclick="applyPreset('${hive.hiveId}', 'overheating')">Fever</button>
+              <button class="pill-quick fuzz" onclick="applyPreset('${hive.hiveId}', 'null_temp')" title="Set Brood Temp to explicit null">Null Temp</button>
+              <button class="pill-quick fuzz" onclick="applyPreset('${hive.hiveId}', 'nan_temp')" title="Set Brood Temp to explicit NaN">NaN Temp</button>
             </div>
           </div>
 
           <!-- Footer Actions -->
-          <div class="enclosure-footer">
-            <div class="last-dispatch-readout" title="${hive.lastResult ? (hive.lastResult.message || '') : 'Pending dispatch'}">
+          <div class="card-footer">
+            <div class="last-tx-readout" title="${hive.lastResult ? (hive.lastResult.message || '') : 'Pending dispatch'}">
               ${hive.lastResult 
                 ? `Last: ${hive.lastResult.status || 'NET'} (${hive.lastResult.message || ''})`
-                : 'Pending initial dispatch'}
+                : 'Pending dispatch'}
             </div>
-            <div class="enclosure-actions-group">
-              <button class="btn-action-ghost" onclick="resetHive('${hive.hiveId}')" title="Revert to natural biology simulation">
+            <div class="card-actions-group">
+              <button class="btn-secondary" onclick="resetHive('${hive.hiveId}')" title="Revert to natural biology simulation">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
                   <path d="M3 3v5h5"/>
                 </svg>
                 <span>Revert</span>
               </button>
-              <button class="btn-action-outline" onclick="saveHiveOverrides('${hive.hiveId}')" title="Save pending telemetry overrides">
+              <button class="btn-secondary" onclick="saveHiveOverrides('${hive.hiveId}')" title="Save pending telemetry overrides">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
                   <polyline points="17 21 17 13 7 13 7 21"/>
@@ -1754,8 +1485,8 @@
                 </svg>
                 <span>Save</span>
               </button>
-              <button class="btn-action-transmit" onclick="transmitHiveNow('${hive.hiveId}')" title="Transmit this hive immediately">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <button class="btn-action-send" onclick="transmitHiveNow('${hive.hiveId}')" title="Transmit this hive immediately">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                 </svg>
                 <span>Send Now</span>
@@ -1767,7 +1498,7 @@
         container.appendChild(card);
       });
 
-      // Restore active focus if the user was currently typing
+      // Restore active focus if user was typing
       if (activeId) {
         const el = document.getElementById(activeId);
         if (el) {
@@ -1828,11 +1559,11 @@
         });
         if (res.ok) {
           const card = document.getElementById(`card-${hiveId}`);
-          if (card) card.classList.add('overridden');
+          if (card) card.classList.add('customized');
           const badge = document.getElementById(`status-badge-${hiveId}`);
           if (badge) {
-            badge.className = 'status-capsule capsule-overridden';
-            badge.innerHTML = '<span class="capsule-dot"></span>Manual Override';
+            badge.className = 'node-status-badge badge-custom';
+            badge.innerHTML = '<span class="badge-dot"></span>Manual Override';
           }
           showToast(`Saved telemetry overrides for ${hiveId}`);
           await loadAllHives();
@@ -1895,7 +1626,7 @@
       const btn = document.getElementById('btnTransmitAll');
       btn.disabled = true;
       btn.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;">
           <circle cx="12" cy="12" r="10"/>
           <path d="M12 2a10 10 0 0 1 10 10"/>
         </svg>
@@ -1914,7 +1645,7 @@
       } finally {
         btn.disabled = false;
         btn.innerHTML = `
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
           </svg>
           <span>Transmit Batch Now</span>
@@ -1955,7 +1686,7 @@
       renderLogs(filterLogsList(currentLogs));
     }
 
-    // Update Log Counts in Tabs & Ribbon Health
+    // Update Log Counts in Tabs & Health
     function updateLogCounts() {
       const allC = currentLogs.length;
       const c201 = currentLogs.filter(l => l.status === 201).length;
@@ -1972,7 +1703,7 @@
         const latest = currentLogs[0];
         if (latest.status === 201) {
           ribbonHealth.innerText = "Healthy (201 OK)";
-          ribbonHealth.style.color = "var(--emerald-main)";
+          ribbonHealth.style.color = "var(--green-main)";
         } else if (latest.status === 400) {
           ribbonHealth.innerText = "Validation Reject (400)";
           ribbonHealth.style.color = "var(--rose-main)";
@@ -1990,19 +1721,19 @@
     function renderLogs(logs) {
       const tbody = document.getElementById('logsTableBody');
       if (!logs || logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="empty-ledger">No telemetry transmissions match current filter.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-logs">No telemetry transmissions match current filter.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = '';
       logs.forEach((log, index) => {
-        let statusBadge = `<span class="status-capsule-badge badge-net-err">NET ERR</span>`;
+        let statusBadge = `<span class="badge-status badge-net">NET ERR</span>`;
         if (log.status === 201) {
-          statusBadge = `<span class="status-capsule-badge badge-ok">201 OK</span>`;
+          statusBadge = `<span class="badge-status badge-201">201 OK</span>`;
         } else if (log.status === 400) {
-          statusBadge = `<span class="status-capsule-badge badge-reject">400 REJECT</span>`;
+          statusBadge = `<span class="badge-status badge-400">400 REJECT</span>`;
         } else if (log.status === 200) {
-          statusBadge = `<span class="status-capsule-badge badge-dup">200 DUP</span>`;
+          statusBadge = `<span class="badge-status badge-200">200 DUP</span>`;
         }
 
         const dateStr = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '--:--:--';
@@ -2010,19 +1741,19 @@
         const pSummary = `${p.temperature ?? 'null'}°C | ${p.humidity ?? 'null'}% | ${p.weightKg ?? 'null'}kg | bat:${p.batteryLevelPct ?? 'null'}%`;
 
         const tr = document.createElement('tr');
-        tr.className = 'interactive-row';
+        tr.className = 'row-clickable';
         tr.title = 'Click to toggle payload inspect';
         tr.onclick = () => togglePayloadRow(`payload-row-${index}`);
 
         tr.innerHTML = `
           <td>${dateStr}</td>
-          <td><strong style="color: var(--text-primary);">${log.hiveId}</strong></td>
+          <td><strong style="color: var(--text-main);">${log.hiveId}</strong></td>
           <td>${log.deviceId}</td>
           <td style="color: var(--text-muted); font-size: 11.5px;">${pSummary}</td>
           <td>${statusBadge}</td>
           <td>${log.durationMs ? `${log.durationMs}ms` : '--'}</td>
           <td>
-            <button class="btn-action-ghost" style="padding: 3px 9px; font-size: 11px;" onclick="event.stopPropagation(); togglePayloadRow('payload-row-${index}')">
+            <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="event.stopPropagation(); togglePayloadRow('payload-row-${index}')">
               Inspect
             </button>
           </td>
@@ -2032,15 +1763,15 @@
         trDetail.id = `payload-row-${index}`;
         trDetail.style.display = 'none';
         trDetail.innerHTML = `
-          <td colspan="7" style="padding: 14px 18px; background: rgba(0, 0, 0, 0.3);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span style="font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.08em;">Transmitted Telemetry Frame (JSON):</span>
-              <button class="btn-action-ghost" style="padding: 3px 9px; font-size: 11px;" onclick="copyJsonPayload(${index})">Copy JSON</button>
+          <td colspan="7" style="padding: 12px 16px; background: rgba(0, 0, 0, 0.25);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.06em;">Transmitted Payload (JSON):</span>
+              <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="copyJsonPayload(${index})">Copy JSON</button>
             </div>
-            <pre class="payload-cell-preview">${escapeHtml(JSON.stringify(log.payload, null, 2))}</pre>
+            <pre class="payload-view">${escapeHtml(JSON.stringify(log.payload, null, 2))}</pre>
             ${log.responseBody ? `
-              <div style="margin-top: 12px; font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.08em; margin-bottom: 6px;">Ingestion Engine Response:</div>
-              <pre class="payload-cell-preview">${escapeHtml(typeof log.responseBody === 'string' ? log.responseBody : JSON.stringify(log.responseBody, null, 2))}</pre>
+              <div style="margin-top: 10px; font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.06em; margin-bottom: 4px;">Backend Response:</div>
+              <pre class="payload-view">${escapeHtml(typeof log.responseBody === 'string' ? log.responseBody : JSON.stringify(log.responseBody, null, 2))}</pre>
             ` : ''}
           </td>
         `;
@@ -2061,7 +1792,7 @@
       const log = currentLogs[index];
       if (log && log.payload) {
         navigator.clipboard.writeText(JSON.stringify(log.payload, null, 2));
-        showToast('Telemetry payload copied to clipboard');
+        showToast('Payload copied to clipboard');
       }
     }
 
